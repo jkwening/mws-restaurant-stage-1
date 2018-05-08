@@ -319,11 +319,20 @@ nav h1 a {
   .filter-options h2 {
     width: 100%;
     height: 48px;
+    position: sticky;
+    top: 10px;
   }
   .filter-options select {
     margin: 10px 5%;
     width: 90%;
     height: 48px;
+    position: sticky;
+  }
+  #neighborhoods-select {
+    top: 58px;
+  }
+  #cuisines-select {
+    top: 126px;
   }
   #restaurants-list {
     display: flex;
