@@ -104,6 +104,9 @@ nav h1 a {
     text-decoration: underline;
 }
 /* ====================== Map ====================== */
+#map-container {
+  width: 100%;
+}
 #map {
   height: 400px;
   width: 100%;
@@ -207,6 +210,7 @@ nav h1 a {
 .inside #footer {
   bottom: 0;
   position: absolute;
+  width: calc(100% - 50px);
 }
 #restaurant-name {
   color: #f18200;
@@ -298,6 +302,10 @@ nav h1 a {
 
 /* ====================== Adjust for Large Viewport ====================== */
 @media screen and (min-width: 800px) {
+  #maincontent {
+    display: flex;
+    flex-wrap: wrap;
+  }
   #results-container {
     display: flex;
     flex-wrap: wrap;
@@ -323,11 +331,28 @@ nav h1 a {
     width: calc(75% - 30px);
     margin-top: 0;
   }
+  /* Restaurant Details */
+  .inside #restaurant-container, #reviews-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #restaurant-container h1 {
+    width: 100%;
+  }
+  .wide-50 {
+    width: 50%;
+    margin: auto;
+  }
 }
 
 /* ====================== Adjust for X-Large Viewport ====================== */
 @media screen and (min-width: 1000px) {
   #results-container {
+    width: 1000px;
+    margin: auto;
+  }
+  .inside #restaurant-container, #reviews-container {
     width: 1000px;
     margin: auto;
   }
