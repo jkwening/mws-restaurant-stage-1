@@ -77,7 +77,7 @@ nav h1 a {
     background-color: #eee;
     font-size: 17px;
     margin: 0;
-    width: calc(50% - 80px);
+    width: 100%;
 }
 
 /* Display list items side by side */
@@ -104,6 +104,9 @@ nav h1 a {
     text-decoration: underline;
 }
 /* ====================== Map ====================== */
+#map-container {
+  width: 100%;
+}
 #map {
   height: 400px;
   width: 100%;
@@ -200,21 +203,14 @@ nav h1 a {
 }
 .inside #map-container {
   background: blue none repeat scroll 0 0;
-  height: 87%;
-  position: fixed;
-  right: 0;
-  top: 80px;
-  width: 50%;
 }
 .inside #map {
   background-color: #ccc;
-  height: 100%;
-  width: 100%;
 }
 .inside #footer {
   bottom: 0;
   position: absolute;
-  width: 50%;
+  width: calc(100% - 50px);
 }
 #restaurant-name {
   color: #f18200;
@@ -248,8 +244,7 @@ nav h1 a {
 #restaurant-container, #reviews-container {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
-  padding: 140px 40px 30px;
-  width: 50%;
+  padding: 30px 40px 30px;
 }
 #reviews-container {
   padding: 30px 40px 80px;
@@ -307,6 +302,10 @@ nav h1 a {
 
 /* ====================== Adjust for Large Viewport ====================== */
 @media screen and (min-width: 800px) {
+  #maincontent {
+    display: flex;
+    flex-wrap: wrap;
+  }
   #results-container {
     display: flex;
     flex-wrap: wrap;
@@ -320,11 +319,20 @@ nav h1 a {
   .filter-options h2 {
     width: 100%;
     height: 48px;
+    position: sticky;
+    top: 10px;
   }
   .filter-options select {
     margin: 10px 5%;
     width: 90%;
     height: 48px;
+    position: sticky;
+  }
+  #neighborhoods-select {
+    top: 58px;
+  }
+  #cuisines-select {
+    top: 126px;
   }
   #restaurants-list {
     display: flex;
@@ -332,11 +340,28 @@ nav h1 a {
     width: calc(75% - 30px);
     margin-top: 0;
   }
+  /* Restaurant Details */
+  .inside #restaurant-container, #reviews-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #restaurant-container h1 {
+    width: 100%;
+  }
+  .wide-50 {
+    width: 50%;
+    margin: auto;
+  }
 }
 
 /* ====================== Adjust for X-Large Viewport ====================== */
 @media screen and (min-width: 1000px) {
   #results-container {
+    width: 1000px;
+    margin: auto;
+  }
+  .inside #restaurant-container, #reviews-container {
     width: 1000px;
     margin: auto;
   }
