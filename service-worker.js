@@ -3,8 +3,7 @@ const INITIAL_URLS_TO_CACHE = [
   '/',
   '/css/styles.css',
   '/js/dbhelper.js',
-  '/js/main.js',
-  '/restaurant.html'
+  '/js/main.js'
 ]
 
 self.addEventListener('install', event => {
