@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,11 +16,11 @@
     <!-- Beginning nav -->
     <nav>
       <h1><a href="/">Restaurant Reviews</a></h1>
+      <!-- Beginning breadcrumb -->
+      <ul id="breadcrumb" >
+        <li><a href="/">Home</a></li>
+      </ul>
     </nav>
-    <!-- Beginning breadcrumb -->
-    <ul id="breadcrumb" >
-      <li><a href="/">Home</a></li>
-    </ul>
     <!-- End breadcrumb -->
     <!-- End nav -->
   </header>
@@ -29,15 +29,15 @@
   <!-- Beginning main -->
   <main id="maincontent">
     <!-- Beginning map -->
-    <section id="map-container" role="region" aria-label="Google map">
-      <div id="map"></div>
+    <section id="map-container">
+      <div id="map" role="application" aria-label="Google map with restaurant"></div>
     </section>
     <!-- End map -->
     <!-- Beginning restaurant -->
-    <section id="restaurant-container" role="region" aria-label="Restaurant details">
-      <h1 id="restaurant-name"></h1>
+    <section id="restaurant-container" role="contentinfo" aria-label="Restaurant details">
+      <h2 id="restaurant-name"></h1>
       <div class="wide-50">
-        <img id="restaurant-img" alt="">
+        <img id="restaurant-img">
         <p id="restaurant-cuisine"></p>
       </div>
       <div class="wide-50">
@@ -47,7 +47,7 @@
     </section>
     <!-- end restaurant -->
     <!-- Beginning reviews -->
-    <section id="reviews-container">
+    <section id="reviews-container" role="contentinfo" aria-label="Customer reviews">
       <ul id="reviews-list"></ul>
     </section>
     <!-- End reviews -->
