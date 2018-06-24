@@ -3,14 +3,15 @@
  */
 const CACHE_NAME = 'mws-restaurant-v1'
 const INITIAL_URLS_TO_CACHE = [
-  '/',
+  '/index.html',
+  '/restaurant.html',
   '/css/styles.css',
   '/js/dbhelper.js',
   '/js/main.js'
 ]
 
 /**
- * Install service worker
+ * Install service worker with static files
  */
 self.addEventListener('install', event => {
   console.log(CACHE_NAME, 'installing…');
@@ -36,11 +37,20 @@ self.addEventListener('activate', event => {
  * Handle storing of fetch requests
  */
 self.addEventListener('fetch', event => {
+  // Respond to requests for the root page with 'index.html' from the cache
+  const requestUrl = new URL(event.request.url);
+
+  if (requestUrl.origin === location.origin) {
+    if (requestUrl.pathname === '/') {
+      event.respondWith(caches.match('/index.html'));
+    }
+  }
+
+  // handle all other requests
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return response
-        if (response) {
+        if (response) { // Cache hit - return response
           return response;
         }
         
