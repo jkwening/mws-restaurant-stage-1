@@ -17,19 +17,14 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const restaurants = JSON.parse(xhr.responseText);
-        // const restaurants = json.restaurants;
-        callback(null, restaurants);
+    fetch(DBHelper.DATABASE_URL).then(response => {
+      if (response.status === 200) { // Got a success response from server!
+        return response.json();  // return promise to parse response body to json
       } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
+        const error = (`Request failed. Returned status of ${response.status}`);
         callback(error, null);
       }
-    };
-    xhr.send();
+    }).then(restaurants => callback(null, restaurants));
   }
 
   /**
