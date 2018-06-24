@@ -1,3 +1,6 @@
+/**
+ * Module variables
+ */
 const CACHE_NAME = 'mws-restaurant-v1'
 const INITIAL_URLS_TO_CACHE = [
   '/',
@@ -5,9 +8,14 @@ const INITIAL_URLS_TO_CACHE = [
   '/js/dbhelper.js',
   '/js/main.js'
 ]
+const RESTAURANTS_STORE = 'restaurants';
+const DBName = 'MWS-Restaurant-DB'
 let datastore = null;
 let window = self;  // Needed because web workers have no browsing context which contains 'window' scope
 
+/**
+ * Install service worker
+ */
 self.addEventListener('install', event => {
   console.log(CACHE_NAME, 'installing…');
 
@@ -21,6 +29,9 @@ self.addEventListener('install', event => {
   );
 });
 
+/**
+ * Activate service worker
+ */
 self.addEventListener('activate', event => {
   console.log(CACHE_NAME, 'now ready to handle URL based fetches!');
 
@@ -51,6 +62,9 @@ self.addEventListener('activate', event => {
   }
 });
 
+/**
+ * Handle storing of fetch requests
+ */
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -100,8 +114,6 @@ self.addEventListener('fetch', event => {
  * 5. Do something with the results (which can be found on the request object).
  */
 function createDB(callback) {
-  const DBName = 'RestaurantsDB';
-
   // open database connection to datastore
   let request = window.indexedDB.open(DBName, 1);
 
@@ -110,12 +122,12 @@ function createDB(callback) {
     const db = e.target.result;
 
     // Delete the old datastore
-    if (db.objectStoreNames.contains(DBName)) {
+    if (db.objectStoreNames.contains(RESTAURANTS_STORE)) {
       db.deleteObjectStore(DBName);
     }
 
     // Create a new datastore
-    const store = db.createObjectStore(DBName, {
+    const store = db.createObjectStore(RESTAURANTS_STORE, {
       keyPath: 'id'
     });
   };
@@ -127,12 +139,12 @@ function createDB(callback) {
 
   // Handle successful datastore access
   request.onsuccess = e => {
-    // Get a reference to the db
+    // Get a reference to the datastore
     datastore = e.target.result;
-    callback(null, DBName);
+    callback(null, e.target.result);
   }
 }
 
 function addToDB(callback) {
-  
+
 }
