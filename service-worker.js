@@ -1,3 +1,6 @@
+/**
+ * Module variables
+ */
 const CACHE_NAME = 'mws-restaurant-v1'
 const INITIAL_URLS_TO_CACHE = [
   '/',
@@ -6,6 +9,9 @@ const INITIAL_URLS_TO_CACHE = [
   '/js/main.js'
 ]
 
+/**
+ * Install service worker
+ */
 self.addEventListener('install', event => {
   console.log(CACHE_NAME, 'installing…');
 
@@ -19,10 +25,16 @@ self.addEventListener('install', event => {
   );
 });
 
+/**
+ * Activate service worker
+ */
 self.addEventListener('activate', event => {
-  console.log(CACHE_NAME, 'now ready to handle fetches!');
+  console.log(CACHE_NAME, 'now ready to handle URL based fetches!');
 });
 
+/**
+ * Handle storing of fetch requests
+ */
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
