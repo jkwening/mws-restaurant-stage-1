@@ -7,7 +7,8 @@ const INITIAL_URLS_TO_CACHE = [
   '/restaurant.html',
   '/css/styles.css',
   '/js/dbhelper.js',
-  '/js/main.js'
+  '/js/main.js',
+  '/js/restaurant_info.js'
 ]
 
 /**
@@ -37,14 +38,21 @@ self.addEventListener('activate', event => {
  * Handle storing of fetch requests
  */
 self.addEventListener('fetch', event => {
-  // Respond to requests for the root page with 'index.html' from the cache
   const requestUrl = new URL(event.request.url);
-
+  
+  // Redirect appropriately for root and restaurant.html
   if (requestUrl.origin === location.origin) {
     if (requestUrl.pathname === '/') {
       event.respondWith(caches.match('/index.html'));
+      return;
+    }
+
+    if (requestUrl.pathname === '/restaurant.html') {
+      event.respondWith(caches.match('/restaurant.html'));
+      return;
     }
   }
+
 
   // handle all other requests
   event.respondWith(
