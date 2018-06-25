@@ -1,7 +1,5 @@
-let idbActive = false;
 const RESTAURANTS_STORE = 'restaurants';
 const DBName = 'MWS-Restaurant-DB'
-let datastore = null;
 
 /**
  * Common database helper functions.
@@ -22,9 +20,43 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    if (idbActive) {
-      DBHelper.getAllRestaurants(callback);
+    if (DBHelper.checkForSupport()) { // Use IndexedDB if supported
+      DBHelper.openDB((err, resp) => { // open database
+        if (err) {
+          console.log('Failed to openDB - fetching directly from server!');
+          DBHelper.fetchFromURL(callback); // failed so fetch from server
+        } else {
+          const datastore = resp;
+          DBHelper.getNumRecords(datastore, (error, response) => { // check for records
+            if (response > 0) { // get available records
+              DBHelper.getAllRestaurants(datastore, (e, r) => {
+                if (e) {
+                  console.log('Error with getAllRestaurants - fetching directly from server!');
+                  DBHelper.fetchFromURL(callback); // failed so fetch from server
+                }
+                console.log('Records available - returning from indexedDB!');
+                callback(null, r); // Success - Return data from indexedDB
+              });
+            }
+
+            DBHelper.fetchFromURL((er, res) => { // failed or no records so fetch from server
+              if (er) { // failed - return error
+                callback(er, null);
+              } else if (response === 0) { // populate database if empty
+                DBHelper.addRestaurants(res, datastore, (err, resp) => {
+                  console.log('Add to DB using data from server!');
+                  callback(null, res); // return fetched data
+                });
+              } else {
+                console.log('Failed adding to DB - returning server data!');
+                callback(null, res); // return fetched data
+              }
+            })
+          });
+        }
+      })
     } else {
+      console.log('IndexedDB not supported - fetching directly from server!');
       DBHelper.fetchFromURL(callback);
     }
   }
@@ -182,39 +214,16 @@ class DBHelper {
   static checkForSupport() {    
     if (!('indexedDB' in window)) {
       console.log("Your browser doesn't support a stable version of IndexedDB.")
-    } else {
-      // Attempt to create an indexedDB database.
-      DBHelper.createDB((error, response) => {
-        if (error) {
-          console.log(`IndexedDB - Create database event error code: ${error}!`);
-        } else {
-          console.log(`${DBName} is ready to handle storing restaurant data!`);
-
-          // Attempt to fetch data and store in indexedDB
-          DBHelper.fetchFromURL((error, response) => {
-            if (error) {
-              console.log(error);
-            } else { // Fetched data - store in indexedDB
-              DBHelper.addRestaurants(response, (err, resp) => {
-                if (err) {
-                  console.log(`Failed to populated ${DBName}! Error code: ${err}`);
-                } else { // Data loaded into indexedDB
-                  console.log(`Success - the following was loaded: ${response}`);
-                  idbActive = true;
-                }
-              })
-            }
-          })
-        }
-      })
+      return false;
     }
+    return true;
   }
 
   /**
    * Create indexedDB database and initialize an object store if it doesn't exist.
    * @param {object} callback 
    */
-  static createDB(callback) {
+  static openDB(callback) {
     // open database connection to datastore
     let request = window.indexedDB.open(DBName, 1);
 
@@ -244,9 +253,25 @@ class DBHelper {
 
     // Handle successful datastore access
     request.onsuccess = e => {
-      // Get a reference to the datastore
-      datastore = e.target.result;
+      // Return the datastore
       callback(null, e.target.result);
+    }
+  }
+
+  /**
+   * Returns the number of records in indexedDB
+   * @param {object} callback 
+   */
+  static getNumRecords(datastore, callback) {
+    const objStore = datastore.transaction(RESTAURANTS_STORE).objectStore(RESTAURANTS_STORE);
+    const request = objStore.count();
+
+    request.onsuccess = () => {
+      callback(null, request.result);
+    }
+
+    request.onerror = e => {
+      callback(e.target.errorCode, null);
     }
   }
 
@@ -255,7 +280,7 @@ class DBHelper {
    * @param {JSON} data 
    * @param {object} callback 
    */
-  static addRestaurants(data, callback) {
+  static addRestaurants(data, datastore, callback) {
     // Initiate a new transaction and get object store
     const transaction = datastore.transaction([RESTAURANTS_STORE], 'readwrite');
     const store = transaction.objectStore(RESTAURANTS_STORE);
@@ -302,11 +327,12 @@ class DBHelper {
    * Get all restaurant data from indexedDB database.
    * @param {object} callback 
    */
-  static getAllRestaurants(callback) {
+  static getAllRestaurants(datastore, callback) {
     const objStore = datastore.transaction(RESTAURANTS_STORE).objectStore(RESTAURANTS_STORE);
     const request = objStore.getAll();
 
     request.onsuccess = e => {
+      console.log(`Returning data from ${DBName}!`)
       callback(null, e.target.result);
     }
     
