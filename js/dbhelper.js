@@ -13,7 +13,7 @@ class DBHelper {
   static get DATABASE_URL() {
     // const port = 8000 // Change this to your server port
     // return `http://localhost:${port}/data/restaurants.json`;
-    return 'http://localhost:1337/restaurants'; // user actual server instead local json
+    return `http://localhost:1337`; // user actual server instead local json
   }
 
   /**
@@ -61,15 +61,16 @@ class DBHelper {
     }
   }
 
-  static fetchFromURL(callback) {
-    fetch(DBHelper.DATABASE_URL).then(response => {
+  static fetchFromURL(callback, endpoint = 'restaurants') {
+    const db_url = `${DBHelper.DATABASE_URL}/${endpoint}`;
+    fetch(db_url).then(response => {
       if (response.status === 200) { // Got a success response from server!
         return response.json();  // return promise to parse response body to json
       } else { // Oops!. Got an error from server.
         const error = (`Request failed. Returned status of ${response.status}`);
         callback(error, null);
       }
-    }).then(restaurants => callback(null, restaurants));
+    }).then(result => callback(null, result));
   }
 
   /**
@@ -206,6 +207,10 @@ class DBHelper {
       animation: google.maps.Animation.DROP}
     );
     return marker;
+  }
+
+  static fetchReviews(restaurant) {
+
   }
 
   /**
