@@ -209,8 +209,14 @@ class DBHelper {
     return marker;
   }
 
-  static fetchReviews(restaurant) {
-
+  /**
+   * Fetch all reviews for given restaurant id.
+   * @param {number} restaurant_id 
+   * @param {object} callback 
+   */
+  static fetchReviewsByRestaurantID(restaurant_id, callback) {
+    const endpoint = `reviews/?restaurant_id=${restaurant_id}`
+    DBHelper.fetchFromURL(callback, endpoint)
   }
 
   /**
