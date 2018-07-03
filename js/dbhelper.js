@@ -1,5 +1,7 @@
+const RESTAURANTS_DBNAME = 'MWS-Restaurants-DB';
 const RESTAURANTS_STORE = 'restaurants';
-const DBName = 'MWS-Restaurant-DB'
+const REVIEWS_DBNAME = 'MWS-Reviews-DB';
+const REVIEWS_STORE = 'reviews';
 
 /**
  * Common database helper functions.
@@ -21,7 +23,7 @@ class DBHelper {
    */
   static fetchRestaurants(callback) {
     if (DBHelper.checkForSupport()) { // Use IndexedDB if supported
-      DBHelper.openDB((err, resp) => { // open database
+      DBHelper.openRestaurantsDB((err, resp) => { // open database
         if (err) {
           console.log('Failed to openDB - fetching directly from server!');
           DBHelper.fetchFromURL(callback); // failed so fetch from server
@@ -234,9 +236,9 @@ class DBHelper {
    * Create indexedDB database and initialize an object store if it doesn't exist.
    * @param {object} callback 
    */
-  static openDB(callback) {
+  static openRestaurantsDB(callback) {
     // open database connection to datastore
-    let request = window.indexedDB.open(DBName, 1);
+    let request = window.indexedDB.open(RESTAURANTS_DBNAME, 1);
 
     // handle datastore upgrades
     request.onupgradeneeded = e => {
@@ -244,11 +246,46 @@ class DBHelper {
 
       // Delete the old datastore
       if (db.objectStoreNames.contains(RESTAURANTS_STORE)) {
-        db.deleteObjectStore(DBName);
+        db.deleteObjectStore(RESTAURANTS_DBNAME);
       }
 
       // Create a new datastore
       const store = db.createObjectStore(RESTAURANTS_STORE, {
+        keyPath: 'id'
+      });
+
+      // Create indices to search by 'cuisine' and 'neighborhoods'
+      store.createIndex('neighborhood', 'neighborhood', {unique: false});
+      store.createIndex('cuisine', 'cuisine_type', {unique: false});
+    };
+
+    // Handle errors when opening the datastore
+    request.onerror = e => {
+      callback(e.target.errorCode, null);
+    }
+
+    // Handle successful datastore access
+    request.onsuccess = e => {
+      // Return the datastore
+      callback(null, e.target.result);
+    }
+  }
+
+  static openReviewsDB(callback) {
+    // open database connection to datastore
+    let request = window.indexedDB.open(REVIEWS_DBNAME, 1);
+
+    // handle datastore upgrades
+    request.onupgradeneeded = e => {
+      const db = e.target.result;
+
+      // Delete the old datastore
+      if (db.objectStoreNames.contains(REVIEWS_STORE)) {
+        db.deleteObjectStore(REVIEWS_DBNAME);
+      }
+
+      // Create a new datastore
+      const store = db.createObjectStore(REVIEWS_STORE, {
         keyPath: 'id'
       });
 
@@ -343,7 +380,7 @@ class DBHelper {
     const request = objStore.getAll();
 
     request.onsuccess = e => {
-      console.log(`Returning data from ${DBName}!`)
+      console.log(`Returning data from ${RESTAURANTS_DBNAME}!`)
       callback(null, e.target.result);
     }
     
