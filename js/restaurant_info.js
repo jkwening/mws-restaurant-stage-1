@@ -129,6 +129,11 @@ fillReviewsHTML = () => {
     const title = document.createElement('h2');
     title.innerHTML = 'Reviews';
     container.appendChild(title);
+
+    const addReviewBtn = document.createElement('button');
+    addReviewBtn.innerHTML = 'Add Review';
+    addReviewBtn.setAttribute('id', 'addReviewBtnw');
+    container.appendChild(addReviewBtn);
   
     if (!reviews) {
       const noReviews = document.createElement('p');
