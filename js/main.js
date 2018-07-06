@@ -3,8 +3,6 @@ let restaurants,
   cuisines;
 var map;
 var markers = [];
-let offlineMode = false;
-
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -200,8 +198,8 @@ if ('serviceWorker' in navigator) {
  */
 if (DBHelper.checkForIDBSupport()) {
   // fetch data if database is empty
-  DBHelper.getNumRecords(RESTAURANTS_STR).then(count => {
-    if (count === 0) {
+  DBHelper.recordsInIDB(RESTAURANTS_STR).then(result => {
+    if (!result) {
       DBHelper.fetchFromServer(RESTAURANTS_STR,
         (error, data) => {
           if (error) {
@@ -209,14 +207,12 @@ if (DBHelper.checkForIDBSupport()) {
           } else {
             DBHelper.addRecords(data, RESTAURANTS_STR)
               .then(() => {
-                offlineMode = true;
                 console.log('Records added to IDB! Data available offline!')
               })
               .catch(() => console.log('Error adding data to IDB! Offline mode = false!'));
           }
         });
     } else {
-      offlineMode = true;
       console.log('Records already available in IDB! Data available offline!')
     }
   });

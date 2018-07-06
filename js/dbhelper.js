@@ -110,36 +110,64 @@ class DBHelper {
    * Fetch all neighborhoods with proper error handling.
    */
   static fetchNeighborhoods(callback) {
-    // Fetch all restaurants
-    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
-      if (error) {
-        callback(error, null);
+    DBHelper.recordsInIDB(RESTAURANTS_STR).then(result => {
+      if (result) {
+        DBHelper.getAllRecords(RESTAURANTS_STR).then(restaurants => {
+          DBHelper.getUniqueNeighborhoods(restaurants, callback);
+        }).catch(error => {
+          callback(error, null);
+        })
       } else {
-        // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
-        // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
-        callback(null, uniqueNeighborhoods);
+        // Fetch all restaurants
+        DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
+          if (error) {
+            callback(error, null);
+          } else {
+            DBHelper.getUniqueNeighborhoods(restaurants, callback);
+          }
+        });
       }
-    });
+    })
+  }
+
+  static getUniqueNeighborhoods(restaurants, callback) {
+    // Get all neighborhoods from all restaurants
+    const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
+    // Remove duplicates from neighborhoods
+    const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
+    callback(null, uniqueNeighborhoods);
   }
 
   /**
    * Fetch all cuisines with proper error handling.
    */
   static fetchCuisines(callback) {
-    // Fetch all restaurants
-    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
-      if (error) {
-        callback(error, null);
+    DBHelper.recordsInIDB(RESTAURANTS_STR).then(result => {
+      if (result) {
+        DBHelper.getAllRecords(RESTAURANTS_STR).then(restaurants => {
+          DBHelper.getUniqueCuisines(restaurants, callback);
+        }).catch(error => {
+          callback(error, null);
+        })
       } else {
-        // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
-        // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
-        callback(null, uniqueCuisines);
+        // Fetch all restaurants
+        DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
+          if (error) {
+            callback(error, null);
+          } else {
+            DBHelper.getUniqueCuisines(restaurants, callback);
+          }
+        });
       }
-    });
+    })
+  }
+
+  static getUniqueCuisines(restaurants, callback) {
+    // Get all cuisines from all restaurants
+    const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
+    // Remove duplicates from cuisines
+    const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
+    callback(null, uniqueCuisines);
   }
 
   /**
@@ -223,6 +251,13 @@ class DBHelper {
     return DBHelper.openDB().then(db => {
       const store = db.transaction(storeName).objectStore(storeName);
       return store.count();      
+    });
+  }
+  
+  static recordsInIDB(storeName) {
+    return DBHelper.getNumRecords(storeName).then(count => {
+      if (count > 0) {return true;}
+      return false;
     });
   }
 
