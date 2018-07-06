@@ -109,6 +109,13 @@ class DBHelper {
     })
   }
 
+  /**
+   * Filter for restaurants per cuisine type and neighborhood.
+   * @param {string} cuisine type to filter by
+   * @param {string} neighborhood to filter by
+   * @param {array} restaurants to filter from
+   * @callback callback (error, response)
+   */
   static filterByCuisineAndNeighborhood(cuisine, neighborhood,
     restaurants, callback) {
       let results = restaurants;
@@ -145,6 +152,11 @@ class DBHelper {
     })
   }
 
+  /**
+   * Get unique neighborhoods from an array of restaurants.
+   * @param {array} restaurants to filter from
+   * @callback callback (error, neighborhoods)
+   */
   static getUniqueNeighborhoods(restaurants, callback) {
     // Get all neighborhoods from all restaurants
     const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
@@ -177,6 +189,11 @@ class DBHelper {
     })
   }
 
+  /**
+   * Get unique types of cuisine from an array of restaurants.
+   * @param {array} restaurants to filter from
+   * @param {*} callback (error, cuisines)
+   */
   static getUniqueCuisines(restaurants, callback) {
     // Get all cuisines from all restaurants
     const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
@@ -269,6 +286,11 @@ class DBHelper {
     });
   }
   
+  /**
+   * Returns true if IDB has records for the given object store.
+   * @param {string} storeName for object store in IDB
+   * @returns {boolean} true if records exist, false otherwise
+   */
   static recordsInIDB(storeName) {
     return DBHelper.getNumRecords(storeName).then(count => {
       if (count > 0) {return true;}

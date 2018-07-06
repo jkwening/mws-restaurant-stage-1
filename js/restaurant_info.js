@@ -93,25 +93,57 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 }
 
 /**
+ * Returns promise that resolves to reviews data or null. The data is fetched
+ * from IDB if available else directly from the server.
+ */
+fetchReviews = () => {
+  return DBHelper.recordsInIDB(REVIEWS_STR).then(result => {
+    if (result) { // get from IDB if records available
+      return DBHelper.getRecordsFromIndex('restaurant_id', self.restaurant.id, REVIEWS_STR)
+        .then(reviews => {
+          console.log(`Fetching reviews for restaurant id: ${self.restaurant.id}`);
+          console.log('Reviews: ', reviews);
+          return reviews;
+        });
+    }
+
+    // else fetch directly from server
+    const reviewsEndpoint = `${REVIEWS_STR}/?restaurant_id=${self.restaurant.id}`;
+    DBHelper.fetchFromServer(reviewsEndpoint, (error, reviews) => {
+      if (error) {
+        console.error(error);
+        return null;
+      }
+      return reviews;
+    })
+  })
+}
+
+/**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
-  const container = document.getElementById('reviews-container');
-  const title = document.createElement('h2');
-  title.innerHTML = 'Reviews';
-  container.appendChild(title);
+fillReviewsHTML = () => {
+  fetchReviews().then(reviews => {
+    const container = document.getElementById('reviews-container');
+    const title = document.createElement('h2');
+    title.innerHTML = 'Reviews';
+    container.appendChild(title);
+  
+    if (!reviews) {
+      const noReviews = document.createElement('p');
+      noReviews.innerHTML = 'No reviews yet!';
+      container.appendChild(noReviews);
+      return;
+    }
 
-  if (!reviews) {
-    const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet!';
-    container.appendChild(noReviews);
-    return;
-  }
-  const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
-  container.appendChild(ul);
+    const ul = document.getElementById('reviews-list');
+    reviews.forEach(review => {
+      ul.appendChild(createReviewHTML(review));
+    });
+    container.appendChild(ul);
+  }).catch(error => {
+    console.error(`Error filling reviews - error: ${error}`);
+  })
 }
 
 /**
@@ -162,4 +194,29 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+/**
+ * Setup indexedDB for storing server data locally if supported
+ */
+if (DBHelper.checkForIDBSupport()) {
+  // fetch data if database is empty
+  DBHelper.recordsInIDB(REVIEWS_STR).then(result => {
+    if (!result) {
+      DBHelper.fetchFromServer(REVIEWS_STR,
+        (error, data) => {
+          if (error) {
+            console.error(error);
+          } else {
+            DBHelper.addRecords(data, REVIEWS_STR)
+              .then(() => {
+                console.log('Records added to IDB! Data available offline!')
+              })
+              .catch(() => console.log('Error adding data to IDB! Offline mode = false!'));
+          }
+        });
+    } else {
+      console.log('Records already available in IDB! Data available offline!')
+    }
+  });
 }
