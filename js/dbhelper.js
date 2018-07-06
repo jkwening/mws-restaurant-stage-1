@@ -187,25 +187,30 @@ class DBHelper {
   static openDB() {
     // return db promise object
     return idb.open(DB_NAME, 1, upgradeDB => {
-      // create restaurant object store
-      const restaurants_store = upgradeDB.createObjectStore(RESTAURANTS_STR,
-        {keyPath: 'id'}
-      );
-      // create neighborhood and cuisine indices
-      restaurants_store.createIndex('neighborhood', 'neighborhood', {
-        unique: false
-      });
-      restaurants_store.createIndex('cuisine', 'cuisine_type', {
-        unique: false
-      });
-      // create reviews object store
-      const reviews_store = upgradeDB.createObjectStore(REVIEWS_STR,
-        {keyPath: 'id'}
-      );
-      // create restaurant_id index
-      reviews_store.createIndex('restaurant_id', 'restaurant_id', {
-        unique: false
-      });        
+      if (!upgradeDB.objectStoreNames.contains(RESTAURANTS_STR)) {
+        // create restaurant object store
+        const restaurants_store = upgradeDB.createObjectStore(RESTAURANTS_STR,
+          {keyPath: 'id'}
+        );
+        // create neighborhood and cuisine indices
+        restaurants_store.createIndex('neighborhood', 'neighborhood', {
+          unique: false
+        });
+        restaurants_store.createIndex('cuisine', 'cuisine_type', {
+          unique: false
+        });
+      }
+
+      if (!upgradeDB.objectStoreNames.contains(REVIEWS_STR)) {
+        // create reviews object store
+        const reviews_store = upgradeDB.createObjectStore(REVIEWS_STR,
+          {keyPath: 'id'}
+        );
+        // create restaurant_id index
+        reviews_store.createIndex('restaurant_id', 'restaurant_id', {
+          unique: false
+        });        
+      }
     });
   }
 
@@ -215,9 +220,6 @@ class DBHelper {
    * @returns {number} count of records in object store 
    */
   static getNumRecords(storeName) {
-    return DBHelper.fetchFromServer(storeName, (error, response) => {
-
-    })
     return DBHelper.openDB().then(db => {
       const store = db.transaction(storeName).objectStore(storeName);
       return store.count();      

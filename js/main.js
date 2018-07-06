@@ -199,18 +199,25 @@ if ('serviceWorker' in navigator) {
  * Setup indexedDB for storing server data locally if supported
  */
 if (DBHelper.checkForIDBSupport()) {
-  DBHelper.fetchFromServer(RESTAURANTS_STR,
-    (error, data) => {
-      if (error) {
-        console.error(error);
-      } else {
-        DBHelper.addRecords(data, RESTAURANTS_STR)
-          .then(() => {
-            offlineMode = true;
-            console.log('Records added to IDB! Data available offline!')
-          })
-          .catch(() => console.log('Error add'));
-      }
-
-    })
+  // fetch data if database is empty
+  DBHelper.getNumRecords(RESTAURANTS_STR).then(count => {
+    if (count === 0) {
+      DBHelper.fetchFromServer(RESTAURANTS_STR,
+        (error, data) => {
+          if (error) {
+            console.error(error);
+          } else {
+            DBHelper.addRecords(data, RESTAURANTS_STR)
+              .then(() => {
+                offlineMode = true;
+                console.log('Records added to IDB! Data available offline!')
+              })
+              .catch(() => console.log('Error adding data to IDB! Offline mode = false!'));
+          }
+        });
+    } else {
+      offlineMode = true;
+      console.log('Records already available in IDB! Data available offline!')
+    }
+  });
 }
