@@ -1,6 +1,6 @@
 const DB_NAME = 'MWS-Restaurant-DB'
 const RESTAURANTS_STR = 'restaurants';
-const REVIEWS_STR = 'restaurants';
+const REVIEWS_STR = 'reviews';
 
 /**
  * Common database helper functions.
@@ -14,18 +14,17 @@ class DBHelper {
   static get DATABASE_URL() {
     // const port = 8000 // Change this to your server port
     // return `http://localhost:${port}/data/restaurants.json`;
-    return 'http://localhost:1337/restaurants'; // user actual server instead local json
+    return 'http://localhost:1337'; // user actual server instead local json
   }
 
   /**
    * Fetch all restaurants.
+   * @param {string} endpoint
+   * @param {function} callback 
    */
-  static fetchRestaurants(callback) {
-    // TODO - may not be needed
-  }
-
-  static fetchFromURL(callback) {
-    fetch(DBHelper.DATABASE_URL).then(response => {
+  static fetchFromServer(endpoint, callback) {
+    const DB_URL = `${DBHelper.DATABASE_URL}/${endpoint}`;
+    return fetch(DB_URL).then(response => {
       if (response.status === 200) { // Got a success response from server!
         return response.json();  // return promise to parse response body to json
       } else { // Oops!. Got an error from server.
@@ -40,7 +39,7 @@ class DBHelper {
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -59,7 +58,7 @@ class DBHelper {
    */
   static fetchRestaurantByCuisine(cuisine, callback) {
     // Fetch all restaurants  with proper error handling
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -75,7 +74,7 @@ class DBHelper {
    */
   static fetchRestaurantByNeighborhood(neighborhood, callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -91,7 +90,7 @@ class DBHelper {
    */
   static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -112,7 +111,7 @@ class DBHelper {
    */
   static fetchNeighborhoods(callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -130,7 +129,7 @@ class DBHelper {
    */
   static fetchCuisines(callback) {
     // Fetch all restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
+    DBHelper.fetchFromServer(RESTAURANTS_STR, (error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
@@ -193,7 +192,7 @@ class DBHelper {
         {keyPath: 'id'}
       );
       // create neighborhood and cuisine indices
-      restaurants_store.createIndex('neighborhood', 'neighbhorhood', {
+      restaurants_store.createIndex('neighborhood', 'neighborhood', {
         unique: false
       });
       restaurants_store.createIndex('cuisine', 'cuisine_type', {
@@ -216,6 +215,9 @@ class DBHelper {
    * @returns {number} count of records in object store 
    */
   static getNumRecords(storeName) {
+    return DBHelper.fetchFromServer(storeName, (error, response) => {
+
+    })
     return DBHelper.openDB().then(db => {
       const store = db.transaction(storeName).objectStore(storeName);
       return store.count();      
