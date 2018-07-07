@@ -146,6 +146,30 @@ fillReviewsHTML = () => {
       ul.appendChild(createReviewHTML(review));
     });
     container.appendChild(ul);
+
+    /**
+     * setup and connect add review form modal
+     */
+    const modal = document.getElementById('add-review-modal');
+    const addBtn = document.getElementById('add-review-btn');
+    const close = document.getElementsByClassName('close')[0];
+    
+    // open modal when user clicks on button
+    addBtn.onclick = () => {
+      modal.style.display = 'block';
+    }
+    
+    // close modal when user clicks on close span (x)
+    close.onclick = () => {
+      modal.style.display = 'none';
+    }
+    
+    // close modal when user clicks anywhere outside of the modal
+    window.onclick = event => {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
   }).catch(error => {
     console.error(`Error filling reviews - error: ${error}`);
   })
