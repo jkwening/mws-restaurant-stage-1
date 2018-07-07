@@ -253,6 +253,7 @@ nav h1 a {
   font-weight: 300;
   letter-spacing: -1px;
   padding-bottom: 1pt;
+  display: inline-block;
 }
 #reviews-list {
   margin: 0;
@@ -277,6 +278,20 @@ nav h1 a {
 }
 
 /* ====================== Add Review Modal ====================== */
+/* Button to display modal */
+#add-review-btn {
+  background-color: orange;
+  color: #fff;
+  display: inline-block;
+  font-size: 10pt;
+  margin-right: 45px;
+  padding: 8px 30px 10px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  float: right;
+  height: 48px;
+}
 /* Modal background */
 .modal {
   display: none;
