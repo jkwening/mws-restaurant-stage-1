@@ -132,7 +132,7 @@ fillReviewsHTML = () => {
 
     const addReviewBtn = document.createElement('button');
     addReviewBtn.innerHTML = 'Add Review';
-    addReviewBtn.setAttribute('id', 'addReviewBtnw');
+    addReviewBtn.setAttribute('id', 'add-review-btn');
     container.appendChild(addReviewBtn);
   
     if (!reviews) {
