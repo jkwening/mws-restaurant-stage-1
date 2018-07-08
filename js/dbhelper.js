@@ -300,7 +300,7 @@ class DBHelper {
 
   /**
    * Add restaurant data to indexedDB database.
-   * @param {JSON} data 
+   * @param {JSON[]} data array of JSON data objects
    * @param {string} storeName object store name
    * @returns {Promise} a promise. Resolves when transaction completes,
    *  rejects if transaction aborts or errors 

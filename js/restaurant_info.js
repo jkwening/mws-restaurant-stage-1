@@ -163,16 +163,56 @@ fillReviewsHTML = () => {
     close.onclick = () => {
       modal.style.display = 'none';
     }
-    
-    // close modal when user clicks anywhere outside of the modal
-    window.onclick = event => {
-      if (event.target == modal) {
-        modal.style.display = 'none';
-      }
-    }
+
+    // if form passes validation, submit form
+    const form = document.getElementById('review-form');
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      submitForm(event);
+    })
   }).catch(error => {
     console.error(`Error filling reviews - error: ${error}`);
   })
+}
+
+submitForm = (event) => {
+  const data = {
+    'restaurant_id': self.restaurant.id,
+    'name': event.path[0][0].value,
+    'rating': event.path[0][1].value,
+    'comments': event.path[0][2].value
+  }
+
+  // fetch post reqeust
+  const endpoint = `${DBHelper.DATABASE_URL}/${REVIEWS_STR}`;
+  fetch(endpoint, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  }).then(response => {
+    // if status = 201 - data was created and stored on server
+    if (response.status === 201) {
+      // reset form and close the modal
+      document.getElementById('add-review-modal').style.display = 'none';
+      document.getElementById('review-form').reset();
+      return response.json();
+    }
+  }).then(data => {
+    // add new review to HTML page
+    const ul = document.getElementById('reviews-list');
+    ul.appendChild(createReviewHTML(data));
+
+    // attempt to update IDB if possible
+    return DBHelper.addRecords([data], REVIEWS_STR);
+  }).then(() => {
+    console.log('New review was added to IDB successfully!');
+  }).catch(error => {
+    console.error('Error in submit(): ', error);
+  });
 }
 
 /**
@@ -188,6 +228,7 @@ createReviewHTML = (review) => {
   date.innerHTML = new Date(review.updatedAt).toDateString();
   li.appendChild(date);
 
+  // TODO - replace with star icons: create a div then add child icons with appropriate number of checks
   const rating = document.createElement('p');
   rating.innerHTML = `Rating: ${review.rating}`;
   li.appendChild(rating);

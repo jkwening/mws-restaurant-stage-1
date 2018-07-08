@@ -282,7 +282,6 @@ nav h1 a {
 #add-review-btn {
   background-color: orange;
   color: #fff;
-  display: inline-block;
   font-size: 10pt;
   margin-right: 45px;
   padding: 8px 30px 10px;
@@ -337,7 +336,7 @@ input[type=text], select, textarea {
   font-size: 11pt;
 }
 select {
-  width: 15px;
+  width: 55px;
 }
 label {
   padding: 12px 12px 12px 0;
