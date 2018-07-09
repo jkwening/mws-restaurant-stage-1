@@ -207,13 +207,13 @@ if (DBHelper.checkForIDBSupport()) {
           } else {
             DBHelper.addRecords(data, RESTAURANTS_STR)
               .then(() => {
-                console.log('Records added to IDB! Data available offline!')
+                console.log('Restaurants records added to IDB! Data available offline!')
               })
-              .catch(() => console.log('Error adding data to IDB! Offline mode = false!'));
+              .catch(() => console.log('Error adding resturants data to IDB! Offline mode = false!'));
           }
         });
     } else {
-      console.log('Records already available in IDB! Data available offline!')
+      console.log('Restaurants records already available in IDB! Data available offline!')
     }
   });
 }

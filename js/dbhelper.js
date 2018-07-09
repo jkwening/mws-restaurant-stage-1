@@ -312,7 +312,7 @@ class DBHelper {
       const store = tx.objectStore(storeName);
       // add all restaurant data into database
       data.forEach(r => {
-        store.add(r);
+        store.put(r);
       });
 
       // return transaction complete promise object
@@ -333,6 +333,20 @@ class DBHelper {
         .index(idxName);
       
       return index.getAll(key);
+    });
+  }
+
+  /**
+   * Returns true if IDB has records for the given object store index.
+   * @param {string} idxName
+   * @param {string} key
+   * @param {string} storeName
+   * @returns {boolean} true if records exist, false otherwise
+   */
+  static recordsInIDBByFilter(idxName, key, storeName) {
+    return this.getRecordsFromIndex(idxName, key, storeName).then(records => {
+      if (records.length > 0) {return true;}
+      return false;
     });
   }
 
