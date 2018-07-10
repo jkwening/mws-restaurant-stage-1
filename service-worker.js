@@ -69,10 +69,23 @@ self.addEventListener('fetch', event => {
   
   // Redirect for backend server
   if (requestUrl.host === 'localhost:1337') {
-    console.log('service-worker: ', requestUrl.host);
+    console.log('service-worker: ', requestUrl.href);
+    if (requestUrl.pathname.includes('restaurants')) {
+      fetchAllRestaurants(event);
+      return;
+    }
   }
 
   // handle all other requests
+  defaultFetchResponse(event);
+});
+
+/**
+ * Helper function for handling fetch request that are not redirected.
+ */
+defaultFetchResponse = event => {
+  console.log('Default - handle all other requests');
+  
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -109,4 +122,46 @@ self.addEventListener('fetch', event => {
         );
       })
   );
-});
+}
+
+/**
+ * Fetch restaurants data - preferably from IDB if possile, else directly from server.
+ */
+fetchAllRestaurants = event => {
+  console.log('fetchAllRestaurants():');
+
+  event.respondWith(
+    DBHelper.recordsInIDB(RESTAURANTS_STR).then(result => {
+      if (result) {
+        console.log('Returning restaurants from IDB!');
+        return DBHelper.getAllRecords(RESTAURANTS_STR).then(records => {
+          return new Response(JSON.stringify(records), {
+            status: 200,
+            statusText: 'OK',
+          });
+        });
+      } else {
+        console.log('Fetching from server then adding to IDB!');
+        return fetch(event.request).then(res => {
+          if (!res || res.status !== 200) {
+            return res;
+          }
+  
+          // clone response and store into IDB
+          return res.json();
+        }).then(restaurants => {
+          console.log('Add restaurants to IDB: ', restaurants);
+  
+          // add to IDB async
+          DBHelper.addRecords(restaurants, RESTAURANTS_STR);
+  
+          // return response back to client
+          return new Response(JSON.stringify(restaurants), {
+            status: 200,
+            statusText: 'OK',
+          });
+        });
+      }
+    })
+  );
+}
