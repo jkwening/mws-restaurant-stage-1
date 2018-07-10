@@ -196,24 +196,24 @@ if ('serviceWorker' in navigator) {
 /**
  * Setup indexedDB for storing server data locally if supported
  */
-if (DBHelper.checkForIDBSupport()) {
-  // fetch data if database is empty
-  DBHelper.recordsInIDB(RESTAURANTS_STR).then(result => {
-    if (!result) {
-      DBHelper.fetchFromServer(RESTAURANTS_STR,
-        (error, data) => {
-          if (error) {
-            console.error(error);
-          } else {
-            DBHelper.addRecords(data, RESTAURANTS_STR)
-              .then(() => {
-                console.log('Restaurants records added to IDB! Data available offline!')
-              })
-              .catch(() => console.log('Error adding resturants data to IDB! Offline mode = false!'));
-          }
-        });
-    } else {
-      console.log('Restaurants records already available in IDB! Data available offline!')
-    }
-  });
-}
+// if (DBHelper.checkForIDBSupport()) {
+//   // fetch data if database is empty
+//   DBHelper.recordsInIDB(RESTAURANTS_STR).then(result => {
+//     if (!result) {
+//       DBHelper.fetchFromServer(RESTAURANTS_STR,
+//         (error, data) => {
+//           if (error) {
+//             console.error(error);
+//           } else {
+//             DBHelper.addRecords(data, RESTAURANTS_STR)
+//               .then(() => {
+//                 console.log('Restaurants records added to IDB! Data available offline!')
+//               })
+//               .catch(() => console.log('Error adding resturants data to IDB! Offline mode = false!'));
+//           }
+//         });
+//     } else {
+//       console.log('Restaurants records already available in IDB! Data available offline!')
+//     }
+//   });
+// }

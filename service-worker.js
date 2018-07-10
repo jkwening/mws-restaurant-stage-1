@@ -1,3 +1,5 @@
+importScripts('/js/idb.js', '/js/dbhelper.js');
+
 /**
  * Module variables
  */
@@ -8,9 +10,11 @@ const INITIAL_URLS_TO_CACHE = [
   '/css/styles.css',
   'js/idb.js',
   '/js/dbhelper.js',
+  '/js/helper.js',
   '/js/main.js',
   '/js/restaurant_info.js'
 ]
+let indexedDBSupported = false;
 
 /**
  * Install service worker with static files
@@ -33,6 +37,14 @@ self.addEventListener('install', event => {
  */
 self.addEventListener('activate', event => {
   console.log(CACHE_NAME, 'now ready to handle URL based fetches!');
+
+  // if indexedDB is supported then create database
+  if (DBHelper.checkForIDBSupport) {
+    DBHelper.openDB().then(() => {
+      console.log('MWS-Restaurant-DB created! Data available offline!')
+      indexedDBSupported = true;
+    }).catch(() => console.log('Error opening IDB! Offline mode = false!'));
+  }
 });
 
 /**
@@ -40,6 +52,7 @@ self.addEventListener('activate', event => {
  */
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
+
   
   // Redirect appropriately for root and restaurant.html
   if (requestUrl.origin === location.origin) {
@@ -47,13 +60,17 @@ self.addEventListener('fetch', event => {
       event.respondWith(caches.match('/index.html'));
       return;
     }
-
+    
     if (requestUrl.pathname === '/restaurant.html') {
       event.respondWith(caches.match('/restaurant.html'));
       return;
     }
   }
-
+  
+  // Redirect for backend server
+  if (requestUrl.host === 'localhost:1337') {
+    console.log('service-worker: ', requestUrl.host);
+  }
 
   // handle all other requests
   event.respondWith(
