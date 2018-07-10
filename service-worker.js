@@ -74,6 +74,19 @@ self.addEventListener('fetch', event => {
       fetchAllRestaurants(event);
       return;
     }
+
+    if (requestUrl.pathname.includes('reviews')) {
+      console.log('SW - Reviews: ', event.request.method);
+      if (event.request.method === 'GET') {
+        fetchReviewsByRestaurantID(event);
+        return;
+      }
+
+      if (event.request.method === 'POST') {
+        postNewReview(event);
+        return;
+      }
+    }
   }
 
   // handle all other requests
@@ -146,8 +159,6 @@ fetchAllRestaurants = event => {
           if (!res || res.status !== 200) {
             return res;
           }
-  
-          // clone response and store into IDB
           return res.json();
         }).then(restaurants => {
           console.log('Add restaurants to IDB: ', restaurants);
@@ -164,4 +175,51 @@ fetchAllRestaurants = event => {
       }
     })
   );
+}
+
+fetchReviewsByRestaurantID = event => {
+  console.log('fetchReviewsByRestaurantID()');
+  const params = (new URL(event.request.url)).searchParams;
+  const restaurantId = parseInt(params.get('id'));
+
+  event.respondWith(
+    DBHelper.recordsInIDB(REVIEWS_STR).then(result => {
+      if (result) { // get from IDB if records available
+        console.log(`Fetching reviews for restaurant id: ${restaurantId}`);
+        return DBHelper.getRecordsFromIndex('restaurant_id', restaurantId, REVIEWS_STR)
+          .then(reviews => {
+            console.log('Reviews: ', reviews);
+            if (reviews.length > 0) {
+              return new Response(JSON.stringify(reviews), {
+                status: 200,
+                statusText: 'OK',
+              });
+            }
+          });
+      } else {
+        // else fetch directly from server
+        return fetch(event.request).then(res => {
+          if (!res || res.status !== 200) {
+            return res;
+          }
+          return res.json();
+        }).then(reviews => {
+          console.log('Add reviews to IDB: ', reviews);
+    
+            // add to IDB async
+            DBHelper.addRecords(reviews, REVIEWS_STR);
+    
+            // return response back to client
+            return new Response(JSON.stringify(reviews), {
+              status: 200,
+              statusText: 'OK',
+            });
+        });
+      }
+    })
+  );
+}
+
+postNewReview = event => {
+  console.log('postNewReview()');
 }

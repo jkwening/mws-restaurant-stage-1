@@ -1,7 +1,8 @@
 let restaurant;
 var map;
 let reviews;
-const BASE_REVIEWS_ENDPOINT = `${DBHelper.DATABASE_URL}/${REVIEWS_STR}`;
+const REVIEWS_STR = 'reviews';
+
 /**
  * Initialize Google map, called from HTML.
  */
@@ -97,50 +98,59 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
  * Returns promise that resolves to reviews data or null. The data is fetched
  * from IDB if available else directly from the server.
  */
-fetchReviews = () => {
-  return DBHelper.recordsInIDB(REVIEWS_STR).then(result => {
-    if (result) { // get from IDB if records available
-      console.log(`Fetching reviews for restaurant id: ${self.restaurant.id}`);
-      return DBHelper.getRecordsFromIndex('restaurant_id', self.restaurant.id, REVIEWS_STR)
-        .then(reviews => {
-          console.log('Reviews: ', reviews);
-          if (reviews.length > 0) {return reviews;}
-        });
-    }
+// fetchReviews = () => {
+//   return DBHelper.recordsInIDB(REVIEWS_STR).then(result => {
+//     if (result) { // get from IDB if records available
+//       console.log(`Fetching reviews for restaurant id: ${self.restaurant.id}`);
+//       return DBHelper.getRecordsFromIndex('restaurant_id', self.restaurant.id, REVIEWS_STR)
+//         .then(reviews => {
+//           console.log('Reviews: ', reviews);
+//           if (reviews.length > 0) {return reviews;}
+//         });
+//     }
 
-    // else fetch directly from server
-    DBHelper.fetchFromServer(getReviewsByRestaurantEndpoint(), (error, reviews) => {
-      if (error) {
-        console.error(error);
-        return null;
-      }
-      // try and add to IDB if possible
-      DBHelper.addRecords(reviews, REVIEWS_STR)
-        .then(() => {
-          console.log('Reviews records added to IDB! Data available offline!')
-        })
-        .catch(() => {
-          console.log('Error adding reviews data to IDB! Offline mode = false!')
-        });
-      return reviews;
-    });
-  }).catch(error => { // error so fetch from server
-    console.error('Error fetching reviews from IDB: ', error);
-    DBHelper.fetchFromServer(getReviewsByRestaurantEndpoint(), (error, reviews) => {
-      if (error) {
-        console.error(error);
-        return null;
-      }
-      return reviews;
-    });
-  });
-}
+//     // else fetch directly from server
+//     DBHelper.fetchFromServer(getReviewsByRestaurantEndpoint(), (error, reviews) => {
+//       if (error) {
+//         console.error(error);
+//         return null;
+//       }
+//       // try and add to IDB if possible
+//       DBHelper.addRecords(reviews, REVIEWS_STR)
+//         .then(() => {
+//           console.log('Reviews records added to IDB! Data available offline!')
+//         })
+//         .catch(() => {
+//           console.log('Error adding reviews data to IDB! Offline mode = false!')
+//         });
+//       return reviews;
+//     });
+//   }).catch(error => { // error so fetch from server
+//     console.error('Error fetching reviews from IDB: ', error);
+//     DBHelper.fetchFromServer(getReviewsByRestaurantEndpoint(), (error, reviews) => {
+//       if (error) {
+//         console.error(error);
+//         return null;
+//       }
+//       return reviews;
+//     });
+//   });
+// }
 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
 fillReviewsHTML = () => {
-  fetchReviews().then(reviews => {
+  const endpoint = `${REVIEWS_STR}/?restaurant_id=${self.restaurant.id}`;
+
+  DBHelper.fetchFromServer((error, response) => {
+    const reviews = response;
+
+    if (error) {
+      console.error(`Error filling reviews - error: ${error}`);
+      reviews = null;
+    }
+
     const container = document.getElementById('reviews-container');
     const title = document.createElement('h2');
     title.innerHTML = 'Reviews';
@@ -185,10 +195,8 @@ fillReviewsHTML = () => {
     form.addEventListener('submit', event => {
       event.preventDefault();
       submitForm(event);
-    })
-  }).catch(error => {
-    console.error(`Error filling reviews - error: ${error}`);
-  })
+    });
+  }, endpoint)
 }
 
 submitForm = (event) => {
@@ -200,7 +208,7 @@ submitForm = (event) => {
   }
 
   // fetch post reqeust
-  fetch(BASE_REVIEWS_ENDPOINT, {
+  fetch(DBHelper.DATABASE_URL(REVIEWS_STR), {
     method: 'POST',
     mode: 'cors',
     credentials: 'include',
@@ -292,28 +300,28 @@ getReviewsByRestaurantEndpoint = () => {
 /**
  * Setup indexedDB for storing server data locally if supported
  */
-if (DBHelper.checkForIDBSupport()) {
-  // get restaurnt id
-  const id = getParameterByName('id');
+// if (DBHelper.checkForIDBSupport()) {
+//   // get restaurnt id
+//   const id = getParameterByName('id');
 
-  // fetch data if database is empty
-  DBHelper.recordsInIDBByFilter('restaurant_id', id, REVIEWS_STR)
-  .then(result => {
-    if (!result) {
-      DBHelper.fetchFromServer(getReviewsByRestaurantEndpoint(),
-        (error, data) => {
-          if (error) {
-            console.error(error);
-          } else {
-            DBHelper.addRecords(data, REVIEWS_STR)
-              .then(() => {
-                console.log('Reviews records added to IDB! Data available offline!')
-              })
-              .catch(() => console.log('Error adding reviews data to IDB! Offline mode = false!'));
-          }
-        });
-    } else {
-      console.log('Reviews records already available in IDB! Data available offline!')
-    }
-  });
-}
+//   // fetch data if database is empty
+//   DBHelper.recordsInIDBByFilter('restaurant_id', id, REVIEWS_STR)
+//   .then(result => {
+//     if (!result) {
+//       DBHelper.fetchFromServer(getReviewsByRestaurantEndpoint(),
+//         (error, data) => {
+//           if (error) {
+//             console.error(error);
+//           } else {
+//             DBHelper.addRecords(data, REVIEWS_STR)
+//               .then(() => {
+//                 console.log('Reviews records added to IDB! Data available offline!')
+//               })
+//               .catch(() => console.log('Error adding reviews data to IDB! Offline mode = false!'));
+//           }
+//         });
+//     } else {
+//       console.log('Reviews records already available in IDB! Data available offline!')
+//     }
+//   });
+// }
