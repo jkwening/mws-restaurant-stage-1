@@ -320,22 +320,29 @@ class DBHelper {
     });
   }
 
+  // TODO - remove if still unused
   /**
    * Get all restaurant data matching the index filter.
-   * @param {string} idxName
+   * @param {string} field
    * @param {string} key
    * @param {string} storeName
    * @returns {Promise} 
    */
-  static getRecordsFromIndex(idxName, key, storeName) {
+  static getRecordsByValue(field, key, storeName) {
     return DBHelper.openDB().then(db => {
-      const index = db.transaction(storeName).objectStore(storeName)
-        .index(idxName);
-      
-      return index.getAll(key);
+      const records = [];
+      const store = db.transaction(storeName).objectStore(storeName);
+      return store.openCursor();
+    }).then(function getRecords(cursor) {
+      if (!cursor) {return;}
+      records.push(cursor.value[field]);
+      return cursor.continue().then(getRecords);
+    }).then(() => {
+      return records;
     });
   }
 
+  // TODO - remove if still unused
   /**
    * Returns true if IDB has records for the given object store index.
    * @param {string} idxName
@@ -345,6 +352,7 @@ class DBHelper {
    */
   static recordsInIDBByFilter(idxName, key, storeName) {
     return this.getRecordsFromIndex(idxName, key, storeName).then(records => {
+      console.log('recordsInIDBByFilter() - records: ', records);
       if (records.length > 0) {return true;}
       return false;
     });
@@ -360,5 +368,22 @@ class DBHelper {
 
       return store.getAll();
     })
+  }
+
+  /**
+   * Returns an array of reviews for given field value
+   * @param {string} field 
+   * @param {object[]} records 
+   */
+  static filterRecordsByFieldValue(field, value, records) {
+    let result = [];
+
+    records.forEach(record => {
+      if (record[field] === value) {
+        result.push(record);
+      }
+    });
+
+    return result;
   }
 }

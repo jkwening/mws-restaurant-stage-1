@@ -78,7 +78,9 @@ self.addEventListener('fetch', event => {
     if (requestUrl.pathname.includes('reviews')) {
       console.log('SW - Reviews: ', event.request.method);
       if (event.request.method === 'GET') {
-        fetchReviewsByRestaurantID(event);
+        const params = requestUrl.searchParams;
+        const id = parseInt(params.get('restaurant_id'));
+        fetchReviewsByRestaurantID(event, id);
         return;
       }
 
@@ -177,45 +179,46 @@ fetchAllRestaurants = event => {
   );
 }
 
-fetchReviewsByRestaurantID = event => {
+fetchReviewsByRestaurantID = (event, restaurantId) => {
   console.log('fetchReviewsByRestaurantID()');
-  const params = (new URL(event.request.url)).searchParams;
-  const restaurantId = parseInt(params.get('id'));
 
   event.respondWith(
-    DBHelper.recordsInIDB(REVIEWS_STR).then(result => {
-      if (result) { // get from IDB if records available
-        console.log(`Fetching reviews for restaurant id: ${restaurantId}`);
-        return DBHelper.getRecordsFromIndex('restaurant_id', restaurantId, REVIEWS_STR)
-          .then(reviews => {
-            console.log('Reviews: ', reviews);
-            if (reviews.length > 0) {
+    DBHelper.getAllRecords(REVIEWS_STR).then(records => {
+      // get reviews for given restaurant id
+      const reviews  = DBHelper.filterRecordsByFieldValue('restaurant_id', restaurantId, records);
+      console.log('Available reviews: ', reviews);
+      if (reviews.length > 0) { // if records founds then return record from IDB as Response
+        console.log('Returning reviews from IDB!');
+        return new Response(JSON.stringify(reviews), {
+          status: 200,
+          statusText: 'OK',
+        });
+      } else { // else redirect to server and attempt to add data to IDB before responding to client
+        console.log('Fetch from server - no reviews available for restaurant id: ', restaurantId);
+        // clone request just in case promise fails at some point in next code logic
+        const fetchRequest = event.request.clone();
+        return fetch(fetchRequest).then(res => {
+          if (!res || res.status !== 200) {
+            return res;
+          } else {
+            return res.json().then(reviews => {
+              console.log('Add reviews to IDB: ', reviews);
+              // add to IDB async
+              DBHelper.addRecords(reviews, REVIEWS_STR);
+
+              // return response back to client
               return new Response(JSON.stringify(reviews), {
                 status: 200,
                 statusText: 'OK',
               });
-            }
-          });
-      } else {
-        // else fetch directly from server
-        return fetch(event.request).then(res => {
-          if (!res || res.status !== 200) {
-            return res;
-          }
-          return res.json();
-        }).then(reviews => {
-          console.log('Add reviews to IDB: ', reviews);
-    
-            // add to IDB async
-            DBHelper.addRecords(reviews, REVIEWS_STR);
-    
-            // return response back to client
-            return new Response(JSON.stringify(reviews), {
-              status: 200,
-              statusText: 'OK',
             });
+          }
         });
       }
+    }).catch(error => {
+      // fetch for client as fail safe
+      console.log('Fail save - redirecting to server due to error: ', error);
+      return fetch(event.request);
     })
   );
 }
