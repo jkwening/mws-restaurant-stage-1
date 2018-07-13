@@ -175,7 +175,8 @@ submitForm = (event) => {
     body: JSON.stringify(data)
   }).then(response => {
     // if status = 201 - data was created and stored on server
-    if (response.status === 201) {
+    // status = 100 - updated locally defer post to server untill connection available
+    if (response.status === 201 || response.status === 100) {
       // reset form and close the modal
       document.getElementById('add-review-modal').style.display = 'none';
       document.getElementById('review-form').reset();
