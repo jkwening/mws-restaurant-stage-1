@@ -254,3 +254,46 @@ getReviewsByRestaurantEndpoint = () => {
   const id = getParameterByName('id');
   return `${REVIEWS_STR}/?restaurant_id=${id}`;
 }
+
+/**
+ * Handle logic related to service worker
+ */
+let activeSW;
+if ('serviceWorker' in navigator) {
+  // listen to state changes
+  navigator.serviceWorker.register('/service-worker.js').then(reg => {
+    console.log('Registration successful, scope is:', reg.scope);
+
+    if (reg.installing) {
+      console.log('[restaurants_info.js] Service worker is installing...');
+      activeSW = reg.installing;
+      activeSW.addEventListener('statechange', () => {
+        if (activeSW.state === 'activated') {
+          activeSW.postMessage({'onlineStatus': navigator.onLine});
+        }
+      });
+    }
+  }).catch(error => {
+    console.log('Service worker registration failed, error:', error);
+  });
+
+  window.addEventListener('online', event => {
+    if (navigator.serviceWorker.controller) {
+      console.log('[restaurants_info.js] Service worker is in control!');
+      navigator.serviceWorker.controller.postMessage({'onlineStatus': true});
+    } else {
+      activeSW.postMessage({'onlineStatus': true});
+    }
+  });
+  
+  window.addEventListener('offline', event => {
+    if (navigator.serviceWorker.controller) {
+      console.log('[restaurants_info.js] Service worker is in control!');
+      navigator.serviceWorker.controller.postMessage({'onlineStatus': false});
+    } else {
+      activeSW.postMessage({'onlineStatus': false});
+    }
+  });
+} else {
+  console.log('Service workers are not supported!');
+}
