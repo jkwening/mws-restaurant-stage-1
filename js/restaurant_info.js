@@ -281,6 +281,7 @@ if ('serviceWorker' in navigator) {
     } else {
       activeSW.postMessage({'onlineStatus': true});
     }
+    notifyUser();
   });
   
   window.addEventListener('offline', event => {
@@ -290,7 +291,31 @@ if ('serviceWorker' in navigator) {
     } else {
       activeSW.postMessage({'onlineStatus': false});
     }
+    notifyUser();
   });
 } else {
   console.log('Service workers are not supported!');
+}
+
+notifyUser = () => {
+  if ('Notification' in window) {
+    if (Notification.permission === 'default') {
+      Notification.requestPermission(permission => {
+        console.log('[notifyUser] Result of permission request: ', permission);
+      })
+    }
+    
+    if (Notification.permission === 'granted') {
+      let text = 'Network connection: ';
+      if (navigator.onLine) {
+        text += 'online!';
+      } else {
+        text += 'offline!';
+      }
+      const notify = new Notification('Online Status', {
+        body: text
+      });
+      setTimeout(notify.close.bind(notify), 4000);
+    }
+  }
 }

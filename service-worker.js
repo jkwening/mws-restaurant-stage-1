@@ -14,19 +14,6 @@ const INITIAL_URLS_TO_CACHE = [
   '/js/main.js',
   '/js/restaurant_info.js'
 ]
-let onlineStatus = null;
-let deferedNewReviews = {
-  1: [],
-  2: [],
-  3: [],
-  4: [],
-  5: [],
-  6: [],
-  7: [],
-  8: [],
-  9: [],
-  10: []
-}; // object storing deferred review for each restaurant id (key)
 
 /**
  * Install service worker with static files
@@ -56,6 +43,8 @@ self.addEventListener('activate', event => {
       console.log('MWS-Restaurant-DB created! Data available offline!')
     }).catch(() => console.log('Error opening IDB! Offline mode = false!'));
   }
+
+  event.waitUntil(self.clients.claim());
 });
 
 /**
@@ -107,23 +96,16 @@ self.addEventListener('fetch', event => {
 });
 
 /**
- * Handles tasks related to changes to connectivity
- */
-updateOnlineStatus = status => {
-  console.log('Current connectivity: ', onlineStatus);
-  onlineStatus = status;
-  console.log('Updated connectivity: ', onlineStatus);
-
-  //TODO // if back online, submit deferred new reviews to server
-}
-
-/**
  * Listen for connectively changes and respond accordingly
  */
 self.addEventListener('message', event => {
-  if (event.data.onlineStatus != null) {updateOnlineStatus(event.data.onlineStatus);}
+  if (event.data.onlineStatus != null) {
+    //TODO - if back online, submit existing deferred new reviews to server
+    if (event.data.onlineStatus) {
+      submitDeferredReviews();
+    }
+  }
 });
-
 
 /**
  * Helper function for handling fetch request that are not redirected.
@@ -209,6 +191,10 @@ fetchAllRestaurants = event => {
   );
 }
 
+/**
+ * Fetch reviews by restaurant id - preferably from IDB if possible, else
+ * directly from server.
+ */
 fetchReviewsByRestaurantID = (event, restaurantId) => {
   console.log('fetchReviewsByRestaurantID()');
 
@@ -253,10 +239,16 @@ fetchReviewsByRestaurantID = (event, restaurantId) => {
   );
 }
 
+/**
+ * Post new reviews for given restaurant id. Post directly to server and
+ * return created review if online else deferred and store locally until
+ * connected to network. Then post to server and update IDB and client
+ * accordingly.
+ */
 postNewReview = (event, restaurantId) => {
   console.log('[service-worker] postNewReview()');
   // if online - post to server, if created add to IDB, and return server response
-  if (onlineStatus) {
+  if (navigator.onLine) {
     event.respondWith(
       fetch(event.request).then(res => {
         if (res.status !== 201) { // return failed post request
@@ -298,4 +290,48 @@ postNewReview = (event, restaurantId) => {
       })
     );
   }
+}
+
+submitDeferredReviews = () => {
+  DBHelper.getAllRecords(REVIEWS_STR).then(reviews => {
+    return DBHelper.filterRecordsByFieldValue('defer', true, reviews);
+  }).then(deferred => {  // attempt to submit, save to IDB server review, and delete deferred review
+    deferred.forEach(review => {
+      const data = {
+        'restaurant_id': review.restaurant_id,
+        'name': review.name,
+        'rating': review.rating,
+        'comments': review.commets
+      }
+      
+      // submit deferred post request
+      const reviews_server_url = `${DBHelper.DATABASE_URL}/${REVIEWS_STR}`;
+      fetch(reviews_server_url, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      }).then(res => {
+        if (res.status === 201) {
+          return res.json(); // proceed in processing via promise chain
+        } else { // throw error if fetch request fails and stop promise chain
+          throw '[submitDeferredReviews] Post fetch returned stats: ' + res.status;
+        }
+      }).then(resData => { // store to IDB and then delete deferred counterpart
+        return DBHelper.addRecords([resData], REVIEWS_STR).then(() => {resData});
+      }).then(resData => {
+        console.log('[submitDeferredReviews] Successfully submitted and added server review:', resData);
+        return DBHelper.deleteRecord(review.id, REVIEWS_STR);
+      }).then(() => {
+        console.log('[submitDeferredReviews] Successfully submitted and deleted deferred review:', review);
+      }).catch((err) => {
+        console.log('[submitDeferredReviews] Current connectivity status:', navigator.onLine);
+        console.error('[submitDeferredReviews] Error submitting deferred review: ', review);
+        console.error('[submitDeferredReviews] Error thrown: ', err);
+      });
+    });
+  });
 }

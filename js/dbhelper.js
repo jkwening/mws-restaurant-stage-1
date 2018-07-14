@@ -299,7 +299,7 @@ class DBHelper {
   }
 
   /**
-   * Add restaurant data to indexedDB database.
+   * Add data to indexedDB database.
    * @param {JSON[]} data array of JSON data objects
    * @param {string} storeName object store name
    * @returns {Promise} a promise. Resolves when transaction completes,
@@ -316,6 +316,19 @@ class DBHelper {
       });
 
       // return transaction complete promise object
+      return tx.complete;
+    });
+  }
+
+  /**
+   * Returns a promise to delete record matching given key.
+   * @param {number} key 
+   * @param {string} storeName 
+   */
+  static deleteRecord(key, storeName) {
+    return DBHelper.openDB().then(db => {
+      const tx = db.transaction(storeName, 'readwrite');
+      tx.objectStore(storeName).delete(key);
       return tx.complete;
     });
   }
