@@ -254,37 +254,48 @@ fetchReviewsByRestaurantID = (event, restaurantId) => {
 }
 
 postNewReview = (event, restaurantId) => {
-  console.log('postNewReview()');
-  // event.respondWith(
-  //   // console.log('navigator.onLine = ', onlineStatus);
-  //   // connectivety = online - post to server, if created add to IDB, and return server response
-  //   if (onlineStatus) {
-  //     // console.log('Posting new review to server!');
-  //     fetch(event.request).then(response => {
-  //       if (response.status === 201) {
-  //         const storeResp = response.clone();
-  //         storeResp.json().then(data => {
-  //           console.log('Add to IDB new review: ', data);
-  //           DBHelper.addRecords([data], REVIEWS_STR);
-  //         });
-  //       }
-  //       return response;
-  //     });
-  //   } else {
-  //     // connectivety = offline - add to 'deferredNewReview', add 'defer' flag to review, add to IDB,
-  //     // and return response with status = 100
-  //     console.log('Deferring new review until online!');
-  //     // store request clone for deferred push
-  //     deferedNewReviews[restaurantId].push(event.request.clone());
-  //     return event.request.body.json().then(data => {
-  //       data[defer] = true;
-  //       console.log('Add to IDB deferred review: ', data);
-  //       DBHelper.addRecords([data], REVIEWS_STR);
-  //       return new Response(JSON.stringify(data), {
-  //         status: 100,
-  //         statusText: 'DEFERRED',
-  //       });
-  //     });
-  //   }
-  // );
+  console.log('[service-worker] postNewReview()');
+  // if online - post to server, if created add to IDB, and return server response
+  if (onlineStatus) {
+    event.respondWith(
+      fetch(event.request).then(res => {
+        if (res.status !== 201) { // return failed post request
+          return res;
+        } else {
+          return res.json().then(review => {
+            console.log('Add newly created review to IDB: ', review);
+              // add to IDB async
+              DBHelper.addRecords([review], REVIEWS_STR);
+
+              // return response back to client
+              return new Response(JSON.stringify(review), {
+                status: 201,
+                statusText: 'CREATED',
+              });
+          });
+        }
+      })
+    );
+  } else { // defer until online again
+    event.respondWith(
+      // add additional data fields
+      event.request.json().then(review => {
+        console.log('Defer the following request: ', review);
+        const timeStamp = Date.now();
+        review.createdAt = timeStamp;
+        review.updatedAt = timeStamp;
+        review.id = timeStamp;
+        review.defer = true;
+        
+        console.log('Add the deferred stamped request to IDB: ', review);
+        // store and return deferred review with status === 100
+        DBHelper.addRecords([review], REVIEWS_STR);
+
+        return new Response(JSON.stringify(review), {
+          status: 202,
+          statusText: 'DEFERRED',
+        });
+      })
+    );
+  }
 }

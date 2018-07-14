@@ -175,8 +175,8 @@ submitForm = (event) => {
     body: JSON.stringify(data)
   }).then(response => {
     // if status = 201 - data was created and stored on server
-    // status = 100 - updated locally defer post to server untill connection available
-    if (response.status === 201 || response.status === 100) {
+    // status = 202 - updated locally defer post to server untill connection available
+    if (response.status === 201 || response.status === 202) {
       // reset form and close the modal
       document.getElementById('add-review-modal').style.display = 'none';
       document.getElementById('review-form').reset();
@@ -186,9 +186,6 @@ submitForm = (event) => {
     // add new review to HTML page
     const ul = document.getElementById('reviews-list');
     ul.appendChild(createReviewHTML(data));
-
-    // attempt to update IDB if possible
-    return DBHelper.addRecords([data], REVIEWS_STR);
   }).then(() => {
     console.log('New review was added to IDB successfully!');
   }).catch(error => {
