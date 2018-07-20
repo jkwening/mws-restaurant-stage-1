@@ -4,7 +4,9 @@
   "description": "Udacity Grow with Google Web Specialist final project",
   "main": "index.html",
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp": "^4.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
