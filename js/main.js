@@ -3,6 +3,8 @@ let restaurants,
   cuisines;
 var map;
 var markers = [];
+let observer;
+let hashRestaurants = {};
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -112,9 +114,14 @@ updateRestaurants = () => {
 resetRestaurants = (restaurants) => {
   // Remove all restaurants
   self.restaurants = [];
+  self.hashRestaurants = {};
   const ul = document.getElementById('restaurants-list');
   ul.innerHTML = '';
-
+  
+  // stop observing targets if observer object exists
+  if (observer) {
+    observer.disconnect();
+  }
   // Remove all map markers
   self.markers.forEach(m => m.setMap(null));
   self.markers = [];
@@ -125,11 +132,55 @@ resetRestaurants = (restaurants) => {
  * Create all restaurants HTML and add them to the webpage.
  */
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
+  // initialize observer object
+  observer = new IntersectionObserver(populateRestaurantHTML, {
+    threshold: 0.1
+  });
+
   const ul = document.getElementById('restaurants-list');
   restaurants.forEach(restaurant => {
-    ul.append(createRestaurantHTML(restaurant));
+    const li = document.createElement('li');
+    li.id = restaurant.id;
+    self.hashRestaurants[restaurant.id] = restaurant;
+    ul.append(li);
+    observer.observe(li);
   });
   addMarkersToMap();
+}
+
+populateRestaurantHTML = (entries, observer) => {
+  entries.forEach(entry => {
+    const li = entry.target;
+    const restaurant = self.hashRestaurants[li.id];
+
+    if (!li.firstElementChild && entry.isIntersecting) { // populate if doesn't exist
+      const image = document.createElement('img');
+      image.className = 'restaurant-img';
+      image.src = DBHelper.imageUrlForRestaurant(restaurant);
+      image.alt = restaurant.name;
+      // image.setAttribute('aria-label', ''); // treat as decorative image
+      li.append(image);
+    
+      const name = document.createElement('h1');
+      name.innerHTML = restaurant.name;
+      li.append(name);
+    
+      const neighborhood = document.createElement('p');
+      neighborhood.innerHTML = restaurant.neighborhood;
+      li.append(neighborhood);
+    
+      const address = document.createElement('p');
+      address.innerHTML = restaurant.address;
+      li.append(address);
+    
+      const more = document.createElement('a');
+      more.innerHTML = 'View Details';
+      more.href = DBHelper.urlForRestaurant(restaurant);
+      more.setAttribute('aria-label', `View details for ${restaurant.name}`)
+      li.append(more)
+    }
+
+  });
 }
 
 /**
