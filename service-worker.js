@@ -7,12 +7,10 @@ const CACHE_NAME = 'mws-restaurant-v1'
 const INITIAL_URLS_TO_CACHE = [
   '/index.html',
   '/restaurant.html',
-  '/css/styles.css',
-  'js/idb.js',
-  '/js/dbhelper.js',
-  '/js/helper.js',
-  '/js/main.js',
-  '/js/restaurant_info.js'
+  'dist/css/styles.css',
+  'dist/js/helper.js',
+  'dist/js/main.js',
+  'dist/js/restaurant_info.js'
 ]
 
 /**
