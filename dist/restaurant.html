@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1"><!-- Normalize.css for better cross-browser consistency --><link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css"><!-- Main CSS file --><link rel="stylesheet" href="css/restaurant.css" type="text/css"><!-- Add icon library --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"><title>Restaurant Info</title></head><body class="inside"><!-- Beginning header --><header><!-- Beginning nav --><nav><h1><a href="/">Restaurant Reviews</a></h1><!-- Beginning breadcrumb --><ul id="breadcrumb" role="navigation" aria-label="breadcrumb"><li><a href="/">Home</a></li></ul></nav><!-- End breadcrumb --><!-- End nav --></header><!-- End header --><!-- Beginning main --><main id="maincontent"><!-- Beginning map --><section id="map-container"><div id="map" role="application" aria-label="Google map with restaurant"></div></section><!-- End map --><!-- Beginning restaurant --><section id="restaurant-container" role="contentinfo" aria-label="Restaurant details"><h2 id="restaurant-name"><div class="wide-50"><img id="restaurant-img"><p id="restaurant-cuisine"></p></div><div class="wide-50"><p id="restaurant-address"></p><table id="restaurant-hours"></table></div></h2></section><!-- end restaurant --><!-- Beginning reviews --><section id="reviews-container" role="contentinfo" aria-label="Customer reviews"><ul id="reviews-list"></ul></section><!-- End reviews --><!-- Beginning add reviews modal --><section id="add-review-modal" class="modal"><!-- Modal content --><div class="modal-content"><span class="close">&times;</span><p>Please complete the form to add your review! Thanks!</p><!-- review form --><form id="review-form" name="review-form"><div class="row"><div class="col-25"><label for="name">Name</label></div><div class="col-75"><input type="text" id="name" name="name" placeholder="Your name..." required></div></div><div class="row"><div class="col-25"><label for="rating">Rating</label></div><div class="col-75"><select id="rating" name="rating" required><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div></div><div class="row"><div class="col-25"><label for="comment">Comment</label></div><div class="col-75"><textarea id="comment" name="comments" placeholder="Write your comment here..." style="height: 200px" required></textarea></div></div><div class="row"><div class="col-25"></div><div class="col-75"><input id="form-submit" type="submit" value="submit"></div></div></form></div></section><!-- End add reviews modal --></main><!-- End main --><!-- Beginning footer --><footer id="footer">Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.</footer><!-- End footer --><!-- Beginning scripts --><script>/**
+       * Handle logic related to service worker
+       */
+      let activeSW;
+      if ('serviceWorker' in navigator) {
+        // listen to state changes
+        navigator.serviceWorker.register('/service-worker.js').then(reg => {
+          console.log('Registration successful, scope is:', reg.scope);
+  
+          if (reg.installing) {
+            console.log('[restaurants_info.js] Service worker is installing...');
+            activeSW = reg.installing;
+            activeSW.addEventListener('statechange', () => {
+              if (activeSW.state === 'activated') {
+                activeSW.postMessage({'onlineStatus': navigator.onLine});
+              }
+            });
+          }
+        }).catch(error => {
+          console.log('Service worker registration failed, error:', error);
+        });
+  
+        window.addEventListener('online', event => {
+          if (navigator.serviceWorker.controller) {
+            console.log('[restaurants_info.js] Service worker is in control!');
+            navigator.serviceWorker.controller.postMessage({'onlineStatus': true});
+          } else {
+            activeSW.postMessage({'onlineStatus': true});
+          }
+          notifyUser();
+        });
+        
+        window.addEventListener('offline', event => {
+          if (navigator.serviceWorker.controller) {
+            console.log('[restaurants_info.js] Service worker is in control!');
+            navigator.serviceWorker.controller.postMessage({'onlineStatus': false});
+          } else {
+            activeSW.postMessage({'onlineStatus': false});
+          }
+          notifyUser();
+        });
+      } else {
+        console.log('Service workers are not supported!');
+      }
+  
+      notifyUser = () => {
+        if ('Notification' in window) {
+          if (Notification.permission === 'default') {
+            Notification.requestPermission(permission => {
+              console.log('[notifyUser] Result of permission request: ', permission);
+            })
+          }
+          
+          if (Notification.permission === 'granted') {
+            let text = 'Network connection: ';
+            if (navigator.onLine) {
+              text += 'online!';
+            } else {
+              text += 'offline!';
+            }
+            const notify = new Notification('Online Status', {
+              body: text
+            });
+            setTimeout(notify.close.bind(notify), 4000);
+          }
+        }
+      }</script><!--build:js js/restaurant.min.js --><!-- Database helpers --><script async defer="defer" type="application/javascript" charset="utf-8" src="js/helper.js"></script><!-- Main javascript file --><script async defer="defer" type="application/javascript" src="js/restaurant_info.js"></script><!-- endbuild --><!-- Google Maps --><script async defer="defer" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB5_piZRacxa_t9dIC9G5hDBtKwh08Er3Q&libraries=places&callback=initMap"></script><!-- End scripts --></body></html>
