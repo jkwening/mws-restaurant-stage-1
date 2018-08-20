@@ -3,12 +3,12 @@
   "name": "MWS-Restaurants",
   "icons": [
     {
-      "src": "/img/diet.svg",
+      "src": "./img/diet.svg",
       "type": "image/svg",
       "sizes": "192x192"
     },
     {
-      "src": "/img/diet.svg",
+      "src": "./img/diet.svg",
       "type": "image/svg",
       "sizes": "512x512"
     }
