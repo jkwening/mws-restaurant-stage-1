@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "description": "Udacity Grow with Google Web Specialist final project",
   "main": "index.html",
-  "dependencies": {
-    "gulp-purgecss": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "del": "^3.0.0",
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-htmlmin": "^4.0.0",
     "gulp-inline-source": "^3.2.0",
+    "gulp-purgecss": "^1.0.0",
     "gulp-rename": "^1.3.0",
     "gulp-sequence": "^1.0.0",
     "gulp-size": "^3.0.0",
