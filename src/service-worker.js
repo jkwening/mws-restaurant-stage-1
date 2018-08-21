@@ -1,16 +1,15 @@
-importScripts('/js/idb.js', '/js/dbhelper.js');
+importScripts('./js/idb.js', './js/dbhelper.js');
 
 /**
  * Module variables
  */
 const CACHE_NAME = 'mws-restaurant-v1'
 const INITIAL_URLS_TO_CACHE = [
-  '/index.html',
-  '/restaurant.html',
-  'dist/css/styles.css',
-  'dist/js/helper.js',
-  'dist/js/main.js',
-  'dist/js/restaurant_info.js'
+  './index.html',
+  './restaurant.html',
+  './js/helper.js',
+  './js/main.js',
+  './js/restaurant_info.js'
 ]
 
 /**
