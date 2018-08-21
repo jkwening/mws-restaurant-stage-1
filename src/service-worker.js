@@ -5,8 +5,8 @@ importScripts('./js/idb.js', './js/dbhelper.js');
  */
 const CACHE_NAME = 'mws-restaurant-v1'
 const INITIAL_URLS_TO_CACHE = [
-  '/index.html',
-  '/restaurant.html',
+  './index.html',
+  './restaurant.html',
   './js/helper.js',
   './js/main.js',
   './js/restaurant_info.js'

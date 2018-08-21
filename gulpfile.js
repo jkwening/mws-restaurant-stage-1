@@ -1,11 +1,8 @@
 const gulp = require('gulp');
 const htmlmin = require('gulp-htmlmin');
-const purgecss = require('gulp-purgecss');
 const terser = require('gulp-terser');
-const rename = require('gulp-rename');
 const size = require('gulp-size');
 const inlinesource = require('gulp-inline-source');
-const gulpSequence = require('gulp-sequence');
 const del = require('del');
 const concat = require('gulp-concat');
 const webp = require('gulp-webp');
@@ -23,12 +20,12 @@ gulp.task('manifest', () => {
 gulp.task('sw', () => {
   return gulp.src('./src/service-worker.js')
     .pipe(size())
-    .pipe(terser())
+    .pipe(terser({compress: {drop_console: true}}))
     .pipe(gulp.dest('./dist'))
     .pipe(size());
 });
 
-// Copy over images
+// Copy over images and convert jpg to webp
 gulp.task('images', () => {
   return gulp.src(['./src/img/*_300w.jpg', './src/img/diet.svg'])
     .pipe(size({showFiles: true}))
@@ -74,27 +71,6 @@ gulp.task('minify-js', () => {
     }))
 });
 
-// TODO - remove if contiune with
-// Create main.css by purging unused css styles
-gulp.task('main.css', () => {
-  return gulp.src('./src/css/styles.css')
-    .pipe(size())
-    .pipe(purgecss({content: ['./src/index.html']}))
-    .pipe(size())
-    .pipe(rename('main.css'))
-    .pipe(gulp.dest('./src/css'));
-});
-
-// Create restaurant.css by purging unused css styles
-gulp.task('restaurant.css', () => {
-  return gulp.src('./src/css/styles.css')
-    .pipe(size())
-    .pipe(purgecss({content: ['./src/restaurant.html']}))
-    .pipe(size())
-    .pipe(rename('restaurant.css'))
-    .pipe(gulp.dest('./src/css'));
-});
-
 // Process html pages by first inlining critical CSS and then minify html
 gulp.task('html', () => {
   return gulp.src(['./src/index.html', './src/restaurant.html'])
@@ -109,7 +85,7 @@ gulp.task('html', () => {
     .pipe(size({showFiles: true}));
 })
 
-// Perform dist build in appropriate sequence
-// gulp.task('build', (cb) => {
-//   gulpSequence('clean', ['manifest', 'sw', 'images', 'main.js', 'restaurant.js', 'minify-js', 'html'], cb)
-// });
+// Perform dist build per sequence by default
+gulp.task('default', gulp.series('clean', 'manifest', 'sw', 'images', 'main.js', 'restaurant.js',
+  'minify-js', 'html'
+));
