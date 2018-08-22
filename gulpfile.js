@@ -34,6 +34,15 @@ gulp.task('images', () => {
     .pipe(gulp.dest('./dist/img'));
 });
 
+// Generate webp images for source folder
+gulp.task('src-images', () => {
+  return gulp.src(['./src/img/*_300w.jpg', './src/img/diet.svg'])
+    .pipe(size({showFiles: true}))
+    .pipe(webp())
+    .pipe(size({showFiles: true}))
+    .pipe(gulp.dest('./src/img'));
+});
+
 // Process main.js by concat activate.js then minify
 gulp.task('main.js', () => {
   return gulp.src(['./src/js/activate-sw.js', './src/js/main.js'])
