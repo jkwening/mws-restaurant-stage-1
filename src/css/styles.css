@@ -211,7 +211,7 @@ nav h1 a {
   width: calc(100% - 50px);
 }
 #restaurant-name {
-  color: #f18200;
+  color: blue;
   font-family: Arial,sans-serif;
   font-size: 20pt;
   font-weight: 200;
@@ -219,9 +219,10 @@ nav h1 a {
   margin: 15px 0 30px;
   text-transform: uppercase;
   line-height: 1.1;
+  text-align: center;
 }
 #restaurant-img {
-	width: 90%;
+	width: 100%;
 }
 #restaurant-address {
   font-size: 12pt;
@@ -237,7 +238,6 @@ nav h1 a {
   padding: 2px 0;
   text-align: center;
   text-transform: uppercase;
-	width: 90%;
 }
 #restaurant-container, #reviews-container {
   border-bottom: 1px solid #d9d9d9;
@@ -248,7 +248,7 @@ nav h1 a {
   padding: 30px 40px 80px;
 }
 #reviews-container h2 {
-  color: #f58500;
+  color: blue;
   font-size: 24pt;
   font-weight: 300;
   letter-spacing: -1px;
@@ -282,10 +282,9 @@ nav h1 a {
 #add-review-btn {
   background-color: blue;
   color: #fff;
-  font-size: 10pt;
-  margin-right: 45px;
-  padding: 8px 30px 10px;
+  font-size: 12pt;
   text-align: center;
+  border-radius: 13px;
   text-decoration: none;
   text-transform: uppercase;
   float: right;
@@ -402,6 +401,19 @@ input[type=submit]:hover {
     width: 75%;
     margin-top: 6px;
   }
+  /* Button to display modal */
+  #add-review-btn {
+    background-color: blue;
+    color: #fff;
+    font-size: 10pt;
+    margin-right: 45px;
+    padding: 8px 30px 10px;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    float: right;
+    height: 48px;
+  }
 }
 
 /* ====================== Adjust for Large Viewport ====================== */
@@ -456,6 +468,19 @@ input[type=submit]:hover {
   .wide-50 {
     width: 50%;
     margin: auto;
+  }
+  /* Button to display modal */
+  #add-review-btn {
+    background-color: blue;
+    color: #fff;
+    font-size: 10pt;
+    margin-right: 45px;
+    padding: 8px 30px 10px;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    float: right;
+    height: 48px;
   }
 }
 
