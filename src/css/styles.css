@@ -307,14 +307,20 @@ nav h1 a {
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
+  width: 90%;
   max-width: 700px;
+  font-size: 15pt;
+  color: ghostwhite;
+  border-radius: 50px;
 }
 /* The close button */
+#close {
+  height: 50px;
+}
 .close {
   color: #aaa;
   float: right;
-  font-size: 28px;
+  font-size: 34px;
   font-weight: bold;
 }
 .close:hover,
@@ -325,13 +331,13 @@ nav h1 a {
 }
 
 /* ====================== Add Review Form ====================== */
-input[type=text], select, textarea {
+#review-form input[type=text], select, textarea {
   width: calc(100% - 26px);
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
   resize: vertical;
-  font-size: 11pt;
+  font-size: 12pt;
 }
 select {
   width: 55px;
@@ -418,6 +424,10 @@ input[type=submit]:hover {
     }
     .wide-50 #restaurant-address, #restaurant-hours {
       padding: 0 10px;
+    }
+    /* Modal */
+    .modal-content {
+      border-radius: 10px;
     }
 }
 
