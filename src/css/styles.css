@@ -268,7 +268,6 @@ nav h1 a {
   overflow: hidden;
   padding: 0 20px 20px;
   position: relative;
-  width: 85%;
 }
 #reviews-list li p {
   margin: 0 0 10px;
@@ -391,6 +390,7 @@ input[type=submit]:hover {
     margin: 15px 5px;
     width: calc(50% - 44px);
   }
+  /* Restaurant Details */
   .col-25 {
     float: left;
     width: 25%;
@@ -401,23 +401,28 @@ input[type=submit]:hover {
     width: 75%;
     margin-top: 6px;
   }
-  /* Button to display modal */
-  #add-review-btn {
-    background-color: blue;
-    color: #fff;
-    font-size: 10pt;
-    margin-right: 45px;
-    padding: 8px 30px 10px;
-    text-align: center;
-    text-decoration: none;
-    text-transform: uppercase;
-    float: right;
-    height: 48px;
-  }
+}
+
+@media screen and (min-width: 750px) {
+    /* Restaurant Details */
+    .inside #restaurant-container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    #restaurant-container h2 {
+      width: 100%;
+    }
+    .wide-50 {
+      width: 50%;
+      margin: auto;
+    }
+    .wide-50 #restaurant-address, #restaurant-hours {
+      padding: 0 10px;
+    }
 }
 
 /* ====================== Adjust for Large Viewport ====================== */
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 830px) {
   #maincontent {
     display: flex;
     flex-wrap: wrap;
@@ -457,30 +462,8 @@ input[type=submit]:hover {
     margin-top: 0;
   }
   /* Restaurant Details */
-  .inside #restaurant-container, #reviews-container {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-  }
-  #restaurant-container h2 {
-    width: 100%;
-  }
-  .wide-50 {
-    width: 50%;
-    margin: auto;
-  }
-  /* Button to display modal */
-  #add-review-btn {
-    background-color: blue;
-    color: #fff;
-    font-size: 10pt;
-    margin-right: 45px;
-    padding: 8px 30px 10px;
-    text-align: center;
-    text-decoration: none;
-    text-transform: uppercase;
-    float: right;
-    height: 48px;
+  .wide-50 #restaurant-address, #restaurant-hours {
+    padding: 0 2.5vw;
   }
 }
 
@@ -490,8 +473,12 @@ input[type=submit]:hover {
     width: 1000px;
     margin: auto;
   }
+  /* Restaurant Details */
   .inside #restaurant-container, #reviews-container {
     width: 1000px;
     margin: auto;
+  }
+  .wide-50 #restaurant-address, #restaurant-hours {
+    padding: 0 5vw;
   }
 }
