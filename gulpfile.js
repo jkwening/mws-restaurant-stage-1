@@ -12,7 +12,7 @@ gulp.task('clean', () => del('dist'));
 
 // Copy over manifest file
 gulp.task('manifest', () => {
-  return gulp.src('./manifest.json')
+  return gulp.src('./src/manifest.json')
     .pipe(gulp.dest('./dist'));
 });
 
