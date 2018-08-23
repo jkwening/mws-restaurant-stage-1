@@ -75,7 +75,7 @@ nav h1 a {
 #breadcrumb {
     padding: 10px 40px 16px;
     list-style: none;
-    background-color: #eee;
+    background-color: #F2F2F2;
     font-size: 17px;
     margin: 0;
     text-align: left;
@@ -95,7 +95,7 @@ nav h1 a {
 
 /* Add a color to all links inside the list */
 #breadcrumb li a {
-    color: #0275d8;
+    color: blue;
     text-decoration: none;
 }
 
@@ -307,7 +307,6 @@ nav h1 a {
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 90%;
   max-width: 700px;
   font-size: 15pt;
   color: ghostwhite;
