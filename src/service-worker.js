@@ -9,7 +9,8 @@ const INITIAL_URLS_TO_CACHE = [
   './restaurant.html',
   './js/helper.js',
   './js/main.js',
-  './js/restaurant_info.js'
+  './js/restaurant_info.js',
+  './manifest.json'
 ]
 
 /**
