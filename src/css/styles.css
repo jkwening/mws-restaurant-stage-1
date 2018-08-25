@@ -213,6 +213,7 @@ nav h1 a {
 }
 #restaurant-header {
   margin: 15px 0 30px;
+  width: 100%;
 }
 #fav-btn {  /* favorite icon div */
   float: right;
