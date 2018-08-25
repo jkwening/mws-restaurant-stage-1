@@ -98,3 +98,12 @@ gulp.task('html', () => {
 gulp.task('default', gulp.series('clean', 'manifest', 'sw', 'images', 'main.js', 'restaurant.js',
   'minify-js', 'html'
 ));
+
+gulp.task('watch', () => {
+  gulp.watch('./src/manifest.json', gulp.parallel('manifest'));
+  gulp.watch('./src/service-worker.js', gulp.parallel('sw'));
+  gulp.watch('./src/img/*.jpg', gulp.parallel('images'));
+  gulp.watch('./src/js/*.js', gulp.parallel('main.js', 'restaurant.js', 'minify-js'));
+  gulp.watch('./src/css/styles.css', gulp.parallel('html'));
+  gulp.watch('./src/*.html', gulp.parallel('html'));
+});

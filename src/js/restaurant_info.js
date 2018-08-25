@@ -54,6 +54,28 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
+  // Show the appropriate fav icon
+  const favIcon = document.getElementById('fav-icon');
+  const notFavIcon = document.getElementById('not-fav-icon');
+  if (restaurant.is_favorite) {
+    favIcon.style.display = 'inline-block';
+    notFavIcon.style.display = 'none';
+  }
+  
+  // Setup onclick handler for favorite icon button
+  const favBtn = document.getElementById('fav-btn');
+  favBtn.onclick = () => { // flag as favorite or not favorite
+    if (favIcon.style.display === 'none' || favIcon.style.display === '') {
+      favIcon.style.display = 'inline-block';
+      notFavIcon.style.display = 'none';
+      DBHelper.updateIsFavorite(restaurant.id);
+    } else {
+      favIcon.style.display = 'none';
+      notFavIcon.style.display = 'inline-block';
+      DBHelper.updateIsFavorite(restaurant.id, false);
+    }
+  }
+
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
 
