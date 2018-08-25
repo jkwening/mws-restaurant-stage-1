@@ -54,6 +54,7 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
   text-align: center;
   text-transform: uppercase;
 }
+
 /* ====================== Navigation ====================== */
 nav {
   width: 100%;
@@ -75,7 +76,7 @@ nav h1 a {
 #breadcrumb {
     padding: 10px 40px 16px;
     list-style: none;
-    background-color: #eee;
+    background-color: #F2F2F2;
     font-size: 17px;
     margin: 0;
     text-align: left;
@@ -95,7 +96,7 @@ nav h1 a {
 
 /* Add a color to all links inside the list */
 #breadcrumb li a {
-    color: #0275d8;
+    color: blue;
     text-decoration: none;
 }
 
@@ -210,13 +211,28 @@ nav h1 a {
   position: absolute;
   width: calc(100% - 50px);
 }
+#restaurant-header {
+  margin: 15px 0 30px;
+}
+#fav-btn {  /* favorite icon div */
+  float: right;
+  height: 48px;
+  width: 48px;
+}
+#fav-icon {
+  color: red;
+  display: none;
+}
+.fa-grin-hearts {
+  font-size: 18pt;
+}
 #restaurant-name {
+  display: inline;
   color: blue;
   font-family: Arial,sans-serif;
   font-size: 20pt;
   font-weight: 200;
   letter-spacing: 0;
-  margin: 15px 0 30px;
   text-transform: uppercase;
   line-height: 1.1;
   text-align: center;
@@ -307,7 +323,6 @@ nav h1 a {
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 90%;
   max-width: 700px;
   font-size: 15pt;
   color: ghostwhite;

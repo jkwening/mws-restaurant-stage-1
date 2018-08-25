@@ -8,7 +8,7 @@
   <!-- Main CSS file -->
   <link rel="stylesheet" href="./css/styles.css" type="text/css" inline>
   <!-- Add icon library -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#3367D6">
   <title>Restaurant Info</title>
@@ -39,7 +39,15 @@
     <!-- End map -->
     <!-- Beginning restaurant -->
     <section id="restaurant-container" role="contentinfo" aria-label="Restaurant details">
-      <h2 id="restaurant-name"></h2>
+      <div id="restaurant-header">
+        <h2 id="restaurant-name"></h2>
+        <div id="fav-btn">
+          <button class="btn">
+            <i id="not-fav-icon" class="far fa-grin-hearts" aria-label="Marked as not a favorite restaurant"></i>
+            <i id="fav-icon" class="fas fa-grin-hearts" aria-label="Marked as a favorite"></i>
+          </button>
+        </div>
+      </div>
       <div class="wide-50">
         <img id="restaurant-img">
         <p id="restaurant-cuisine"></p>

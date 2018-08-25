@@ -67,6 +67,15 @@ self.addEventListener('fetch', event => {
   
   // Redirect for backend server
   if (requestUrl.host === 'localhost:1337') {
+    // Process PUT request for is_favorite flag
+    if (requestUrl.search.includes('?is_favorite') && event.request.method === 'PUT') {
+      const params = requestUrl.searchParams;
+      const isFavorite = params.get('is_favorite');
+      const id = parseInt(requestUrl.pathname.split('/')[2]);
+      updateIsFavorite(event, id, isFavorite);
+      return;
+    }
+
     console.log('service-worker: ', requestUrl.href);
     if (requestUrl.pathname.includes('restaurants')) {
       fetchAllRestaurants(event);
@@ -101,6 +110,7 @@ self.addEventListener('message', event => {
     //TODO - if back online, submit existing deferred new reviews to server
     if (event.data.onlineStatus) {
       submitDeferredReviews();
+      submitDeferredFavorites();
     }
   }
 });
@@ -147,6 +157,53 @@ defaultFetchResponse = event => {
         );
       })
   );
+}
+
+updateIsFavorite = (event, restaurantId, isFavorite) => {
+   // if online - post to server, if created add to IDB, and return server response
+   if (navigator.onLine) {
+    event.respondWith(
+      fetch(event.request).then(res => {
+        if (!res || res.status !== 200) {
+          return res;
+        } else {
+          return res.json().then(restaurant => {
+            console.log('Update restaurant in IDB: ', restaurant);
+            // add to IDB async
+            DBHelper.addRecords([restaurant], RESTAURANTS_STR);
+
+            // return response back to client
+            return new Response(JSON.stringify(restaurant), {
+              status: 200,
+              statusText: 'OK',
+            });
+          });
+        }
+      })
+    );
+  } else { // defer until online again
+    event.respondWith(
+      DBHelper.getAllRecords(RESTAURANTS_STR).then(records => {
+        // get restaurant for given restaurant id
+        const restaurants  = DBHelper.filterRecordsByFieldValue('id', restaurantId, records);
+        const restaurant = restaurants[0];
+        console.log('Defer the following request: ', restaurant);
+        const timeStamp = Date.now();
+        restaurant.createdAt = timeStamp;
+        restaurant.updatedAt = timeStamp;
+        restaurant.is_favorite = isFavorite;
+        restaurant.defer = true;
+        
+        console.log('Add the deferred stamped request to IDB: ', restaurant);
+        DBHelper.addRecords([restaurant], RESTAURANTS_STR);
+
+        return new Response(JSON.stringify(restaurant), {
+          status: 200,
+          statusText: 'DEFERRED',
+        });
+      })
+    );
+  }
 }
 
 /**
@@ -329,6 +386,32 @@ submitDeferredReviews = () => {
         console.log('[submitDeferredReviews] Current connectivity status:', navigator.onLine);
         console.error('[submitDeferredReviews] Error submitting deferred review: ', review);
         console.error('[submitDeferredReviews] Error thrown: ', err);
+      });
+    });
+  });
+}
+
+submitDeferredFavorites = () => {
+  DBHelper.getAllRecords(RESTAURANTS_STR).then(restaurants => {
+    return DBHelper.filterRecordsByFieldValue('defer', true, restaurants);
+  }).then(deferred => {  // attempt to submit, save to IDB server restaurant update, and delete deferred restaurant
+    deferred.forEach(restaurant => {      
+      // submit deferred post request
+      const serverURL = `${DBHelper.DATABASE_URL}/restaurants/${restaurant.id}/?is_favorite=${restaurant.is_favorite}`;
+      fetch(serverURL, {method: 'PUT'}).then(res => {
+        if (res.status === 200) {
+          return res.json(); // proceed in processing via promise chain
+        } else { // throw error if fetch request fails and stop promise chain
+          throw '[submitDeferredFavorites] Post fetch returned stats: ' + res.status;
+        }
+      }).then(resData => { // store to IDB and then delete deferred counterpart
+        return DBHelper.addRecords([resData], RESTAURANTS_STR).then(() => {resData});
+      }).then(() => {
+        console.log('[submitDeferredrestaurants] Successfully submitted and deleted deferred restaurant:', restaurant);
+      }).catch((err) => {
+        console.log('[submitDeferredrestaurants] Current connectivity status:', navigator.onLine);
+        console.error('[submitDeferredrestaurants] Error submitting deferred restaurant: ', restaurant);
+        console.error('[submitDeferredrestaurants] Error thrown: ', err);
       });
     });
   });

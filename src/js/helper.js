@@ -14,9 +14,9 @@ class DBHelper {
   /**
    * Fetch all restaurants.
    */
-  static fetchFromServer(callback, endpoint='restaurants') {
+  static fetchFromServer(callback, endpoint='restaurants', method='GET') {
     const DB_URL = DBHelper.DATABASE_URL(endpoint);
-    fetch(DB_URL).then(response => {
+    fetch(DB_URL, {method}).then(response => {
       if (response.status === 200) { // Got a success response from server!
         return response.json();  // return promise to parse response body to json
       } else { // Oops!. Got an error from server.
@@ -160,5 +160,21 @@ class DBHelper {
       animation: google.maps.Animation.DROP}
     );
     return marker;
+  }
+
+  /**
+   * Update is_favorite flag for given restaurant id.
+   * 
+   * @param {number} restaurantID 
+   * @param {boolean} is_favorite 
+   */
+  static updateIsFavorite(restaurantID, is_favorite=true) {
+    const endpoint = `restaurants/${restaurantID}/?is_favorite=${is_favorite}`;
+    DBHelper.fetchFromServer((err, result) => {
+      if (err) {
+        console.error('[updateIsFavorite] Error: ', err);
+      }
+      console.log('[updateIsFavorite] Success:', result);
+    }, endpoint, 'PUT');
   }
 }
